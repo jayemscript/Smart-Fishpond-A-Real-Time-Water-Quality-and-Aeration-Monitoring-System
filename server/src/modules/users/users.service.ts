@@ -89,7 +89,7 @@ export class UsersService {
       passKey,
       fullname,
       roleId,
-      employeeId,
+      // employeeId,
       access,
     } = createUserDto;
 
@@ -115,18 +115,18 @@ export class UsersService {
     //hash passkey
     const hashedPasskey = await this.hashingService.hash(passKey);
 
-    // check if employee is already assigned to another user
-    if (employeeId) {
-      const existingUserWithEmployee = await this.userRepository.findOne({
-        where: { employeeId: { id: employeeId } },
-      });
+    // // check if employee is already assigned to another user
+    // if (employeeId) {
+    //   const existingUserWithEmployee = await this.userRepository.findOne({
+    //     where: { employeeId: { id: employeeId } },
+    //   });
 
-      if (existingUserWithEmployee) {
-        throw new ConflictException(
-          'This employee is already linked to another user',
-        );
-      }
-    }
+    //   if (existingUserWithEmployee) {
+    //     throw new ConflictException(
+    //       'This employee is already linked to another user',
+    //     );
+    //   }
+    // }
 
     // fetch the role entity
     const role = await this.roleRepository.findOne({ where: { id: roleId } });
@@ -134,13 +134,13 @@ export class UsersService {
       throw new BadRequestException('Invalid roleId');
     }
 
-    let employee: Employee | null = null;
-    if (employeeId) {
-      employee = await this.employeeRepository.findOne({
-        where: { id: employeeId },
-      });
-      if (!employee) throw new BadRequestException('Invalid employeeId');
-    }
+    // let employee: Employee | null = null;
+    // if (employeeId) {
+    //   employee = await this.employeeRepository.findOne({
+    //     where: { id: employeeId },
+    //   });
+    //   if (!employee) throw new BadRequestException('Invalid employeeId');
+    // }
 
     // create user entity
     const newUser = this.userRepository.create({
@@ -150,7 +150,7 @@ export class UsersService {
       password: hashedPassword,
       passKey: hashedPasskey,
       roleId: role,
-      employeeId: employee,
+      // employeeId: employee,
       access,
     });
 
@@ -255,35 +255,35 @@ export class UsersService {
     }
 
     // Handle employeeId (allow null to unlink)
-    if (updateUserDto.hasOwnProperty('employeeId')) {
-      if (updateUserDto.employeeId === null) {
-        // Unlink employee
-        updateData.employeeId = null;
-      } else if (updateUserDto.employeeId !== user.employeeId?.id) {
-        // Check if employee is already linked to another user
-        const existingUserWithEmployee = await this.userRepository.findOne({
-          where: { employeeId: { id: updateUserDto.employeeId } },
-        });
+    // if (updateUserDto.hasOwnProperty('employeeId')) {
+    //   if (updateUserDto.employeeId === null) {
+    //     // Unlink employee
+    //     updateData.employeeId = null;
+    //   } else if (updateUserDto.employeeId !== user.employeeId?.id) {
+    //     // Check if employee is already linked to another user
+    //     const existingUserWithEmployee = await this.userRepository.findOne({
+    //       where: { employeeId: { id: updateUserDto.employeeId } },
+    //     });
 
-        if (
-          existingUserWithEmployee &&
-          existingUserWithEmployee.id !== user.id
-        ) {
-          throw new ConflictException(
-            'This employee is already linked to another user',
-          );
-        }
+    //     if (
+    //       existingUserWithEmployee &&
+    //       existingUserWithEmployee.id !== user.id
+    //     ) {
+    //       throw new ConflictException(
+    //         'This employee is already linked to another user',
+    //       );
+    //     }
 
-        const employee = await this.employeeRepository.findOne({
-          where: { id: updateUserDto.employeeId },
-        });
-        if (!employee) {
-          throw new BadRequestException('Invalid employeeId');
-        }
+    //     const employee = await this.employeeRepository.findOne({
+    //       where: { id: updateUserDto.employeeId },
+    //     });
+    //     if (!employee) {
+    //       throw new BadRequestException('Invalid employeeId');
+    //     }
 
-        updateData.employeeId = employee;
-      }
-    }
+    //     updateData.employeeId = employee;
+    //   }
+    // }
 
     // Handle role relation
     if (updateUserDto.roleId && updateUserDto.roleId !== user.roleId?.id) {
@@ -421,7 +421,7 @@ export class UsersService {
     const beforeDelete = { ...user };
 
     const deletedUser = await this.dataSource.transaction(async (manager) => {
-      if (user.employeeId) await manager.softRemove(user.employeeId);
+      // if (user.employeeId) await manager.softRemove(user.employeeId);
       if (user.authLogs?.length) await manager.softRemove(user.authLogs);
       if (user.userPermissions?.length)
         await manager.softRemove(user.userPermissions);
@@ -479,7 +479,7 @@ export class UsersService {
     const beforeRecovery = { ...user };
 
     const afterRecovery = await this.dataSource.transaction(async (manager) => {
-      if (user.employeeId?.deletedAt) await manager.recover(user.employeeId);
+      // if (user.employeeId?.deletedAt) await manager.recover(user.employeeId);
       if (user.authLogs?.length) await manager.recover(user.authLogs);
       if (user.userPermissions?.length)
         await manager.recover(user.userPermissions);

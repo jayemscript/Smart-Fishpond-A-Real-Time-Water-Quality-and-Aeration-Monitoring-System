@@ -19,20 +19,20 @@ import { v7 as uuidv7 } from 'uuid';
 import { UserPermissions } from 'src/modules/rbac/entities/user-permission.entity';
 import { AuthLog } from 'src/modules/auth/entities/auth-log.entity';
 import { Notifications } from 'src/modules/notifications/entities/notification.entity';
-import { Employee } from 'src/modules/employee/entities/employee.entity';
+// import { Employee } from 'src/modules/employee/entities/employee.entity';
 import { AuditLog } from 'src/modules/audit/entities/audit-log.entity';
 import { DateTimeTransformer } from 'src/shared/dates/date-time.transformer';
 import { BaseEntity } from 'src/shared/entities/base-entity';
 
 @Entity('users')
 export class User extends BaseEntity {
-  @OneToOne(() => Employee, {
-    // eager: true,
-    onDelete: 'CASCADE',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'employee_id' })
-  employeeId: Employee | null;
+  // @OneToOne(() => Employee, {
+  //   // eager: true,
+  //   onDelete: 'CASCADE',
+  //   nullable: true,
+  // })
+  // @JoinColumn({ name: 'employee_id' })
+  // employeeId: Employee | null;
 
 
   @Column({

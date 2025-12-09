@@ -29,8 +29,8 @@ import { EmployeeCoreWorkInfo } from './employee-work-info.entity';
 
 @Entity('employees')
 export class Employee extends BaseEntity {
-  @OneToOne(() => User, (user) => user.employeeId)
-  user: User;
+  // @OneToOne(() => User, (user) => user.employeeId)
+  // user: User;
 
   @Column({
     name: 'employee_id',

@@ -39,9 +39,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   roleId: string;
 
-  @IsUUID()
-  @IsOptional()
-  employeeId: string;
+  // @IsUUID()
+  // @IsOptional()
+  // employeeId: string;
 
   @IsArray()
   @IsString({ each: true })
