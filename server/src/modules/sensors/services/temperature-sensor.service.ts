@@ -1,11 +1,9 @@
-// src/modules/sensors/services/sensors.service.ts
+// src/modules/sensors/services/temperature-sensor.service.ts
 
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateSensorDto } from '../dto/create-sensor.dto';
-import { UpdateSensorDto } from '../dto/update-sensor.dto';
 import { SocketService } from 'src/modules/sockets/socket.service';
 
-interface TemperatureData {
+export interface TemperatureData {
   temperature: number;
   timestamp: Date;
   sensorId: string;
@@ -13,8 +11,8 @@ interface TemperatureData {
 }
 
 @Injectable()
-export class SensorsService {
-  private readonly logger = new Logger(SensorsService.name);
+export class TemperatureSensorService {
+  private readonly logger = new Logger(TemperatureSensorService.name);
   private simulationInterval: NodeJS.Timeout | null = null;
   private isSimulating = false;
 
@@ -111,15 +109,6 @@ export class SensorsService {
       isRunning: this.isSimulating,
       connectedClients: this.socketService.getConnectedClients().length,
     };
-  }
-
-  /**
-   * Send temperature data to specific client (useful for testing)
-   */
-  sendTemperatureToClient(clientId: string) {
-    const data = this.generateTemperatureData();
-    this.socketService.sendToClient(clientId, 'sensor:temperature', data);
-    return data;
   }
 
   /**

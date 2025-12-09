@@ -9,13 +9,18 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { SensorsService } from '../services/sensors.service';
+import {
+  TemperatureSensorService,
+  TemperatureData,
+} from '../services/temperature-sensor.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
 
 @Controller('sensors')
 export class SensorsController {
-  constructor(private readonly sensorsService: SensorsService) {}
+  constructor(
+    private readonly temperatureSensorService: TemperatureSensorService,
+  ) {}
 
   /**
    * POST /sensors/temperature/start
@@ -24,7 +29,7 @@ export class SensorsController {
    */
   @Post('temperature/start')
   startTemperatureSimulation() {
-    return this.sensorsService.startTemperatureSimulation();
+    return this.temperatureSensorService.startTemperatureSimulation();
   }
 
   /**
@@ -34,7 +39,7 @@ export class SensorsController {
    */
   @Post('temperature/stop')
   stopTemperatureSimulation() {
-    return this.sensorsService.stopTemperatureSimulation();
+    return this.temperatureSensorService.stopTemperatureSimulation();
   }
 
   /**
@@ -44,6 +49,6 @@ export class SensorsController {
    */
   @Get('temperature/status')
   getSimulationStatus() {
-    return this.sensorsService.getSimulationStatus();
+    return this.temperatureSensorService.getSimulationStatus();
   }
 }
