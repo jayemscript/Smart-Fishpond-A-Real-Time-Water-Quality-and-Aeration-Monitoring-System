@@ -9,6 +9,7 @@ import { AuthLog } from 'src/modules/auth/entities/auth-log.entity';
 import { Session } from 'src/modules/auth/entities/session.entity';
 import { AuditLog } from 'src/modules/audit/entities/audit-log.entity';
 import { Notifications } from 'src/modules/notifications/entities/notification.entity';
+import { Mailer } from 'src/modules/mailer/entities/mailer.entity';
 const isSSL = process.env.DB_SSL === 'true';
 
 export const AppDataSource = new DataSource({
@@ -27,6 +28,7 @@ export const AppDataSource = new DataSource({
     Session,
     AuditLog,
     Notifications,
+    Mailer,
   ],
   migrations: ['migrations/*.ts'],
   synchronize: true,

@@ -17,6 +17,7 @@ import { AuthLog } from 'src/modules/auth/entities/auth-log.entity';
 import { Session } from 'src/modules/auth/entities/session.entity';
 import { AuditLog } from 'src/modules/audit/entities/audit-log.entity';
 import { Notifications } from 'src/modules/notifications/entities/notification.entity';
+import { Mailer } from './modules/mailer/entities/mailer.entity';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { Notifications } from 'src/modules/notifications/entities/notification.e
             Session,
             AuditLog,
             Notifications,
+            Mailer,
           ],
           synchronize: configService.get<string>('NODE_ENV') === 'development',
           ssl: isSSL ? { rejectUnauthorized: false } : false,
