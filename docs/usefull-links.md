@@ -8,4 +8,5 @@ https://coss.com/origin
 
 https://aws.amazon.com/what-is/retrieval-augmented-generation/
 https://www.geeksforgeeks.org/sql/how-to-design-er-diagrams-for-human-resource-management-hrm-systems/
+https://github.com/capcom6/android-sms-gateway
 ```
