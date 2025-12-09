@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Droplets, Activity, Waves, Gauge, ChevronRight } from 'lucide-react';
+import { ThemeButtons } from '@/components/customs/theme-buttons';
 
 export default function HomeSection() {
   return (
@@ -10,6 +11,9 @@ export default function HomeSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Side - Content */}
           <div className="space-y-8">
+            <div className="flex justify-end">
+              <ThemeButtons />
+            </div>
             <div>
               <div className="inline-flex items-center gap-2 bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-primary/30">
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
