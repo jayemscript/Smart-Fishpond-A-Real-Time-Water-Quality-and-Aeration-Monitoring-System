@@ -5,7 +5,7 @@ import { Droplets, Activity, Waves, Gauge, ChevronRight } from 'lucide-react';
 
 export default function HomeSection() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl w-full">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Side - Content */}
@@ -15,9 +15,9 @@ export default function HomeSection() {
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                 IoT Monitoring System
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6">
+              <h1 className="text-5xl sm:text-9xl lg:text-9xl font-bold leading-tight mb-6">
                 Smart Fishpond
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-400 to-primary mt-2">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-primary via-emerald-400 to-primary mt-2">
                   Water Quality Monitor
                 </span>
               </h1>
@@ -64,10 +64,9 @@ export default function HomeSection() {
 
           {/* Right Side - Live Data Card */}
           <div className="relative">
-            {/* Glow Effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50"></div>
+            <div className="absolute -inset-4 bg-linear-to-r from-primary/20 to-emerald-500/20 rounded-3xl blur-2xl opacity-50"></div>
 
-            <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+            <div className="relative bg-linear-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-2xl font-bold">Live Monitoring</h3>
                 <div className="flex items-center gap-2 text-primary">
@@ -78,7 +77,7 @@ export default function HomeSection() {
 
               <div className="space-y-6">
                 {/* pH Level */}
-                <div className="group bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm border border-primary/20 rounded-2xl p-6 hover:border-primary/40 transition-all">
+                <div className="group bg-linear-to-br from-primary/10 to-primary/5 backdrop-blur-sm border border-primary/20 rounded-2xl p-6 hover:border-primary/40 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="bg-primary/20 p-3 rounded-xl">
@@ -94,7 +93,7 @@ export default function HomeSection() {
                 </div>
 
                 {/* Dissolved O2 */}
-                <div className="group bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-500/40 transition-all">
+                <div className="group bg-linear-to-br from-emerald-500/10 to-emerald-500/5 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-500/40 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="bg-emerald-500/20 p-3 rounded-xl">
@@ -115,7 +114,7 @@ export default function HomeSection() {
                 </div>
 
                 {/* Temperature */}
-                <div className="group bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-500/40 transition-all">
+                <div className="group bg-linear-to-br from-cyan-500/10 to-cyan-500/5 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-500/40 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="bg-cyan-500/20 p-3 rounded-xl">
