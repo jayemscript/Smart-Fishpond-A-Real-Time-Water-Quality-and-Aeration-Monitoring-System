@@ -10,6 +10,7 @@ export const publicRoutes = [
   //   "/reset-password",
   //   "/reset-password-verify",
   //   "/reset-password-complete",
+  '/help',
   '/explore',
   '/creators',
   '/about',
