@@ -136,17 +136,6 @@ export class TemperatureSensorService {
   }
 
   /**
-   * Get current status
-   */
-  getSimulationStatus() {
-    return {
-      isRunning: this.isSimulating,
-      connectedClients: this.socketService.getConnectedClients().length,
-      mode: this.latestESP32Data ? 'ESP32' : 'Simulation',
-    };
-  }
-
-  /**
    * Cleanup on service destroy
    */
   onModuleDestroy() {
