@@ -29,6 +29,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatDate } from '@syntaxsentinel/date-utils';
 
 export default function TemperatureContent() {
   const { socket } = useContext(SocketContext);
@@ -143,21 +144,6 @@ export default function TemperatureContent() {
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   if (!socket || !isConnected) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -243,7 +229,7 @@ export default function TemperatureContent() {
                   <div className="flex items-center gap-2 mt-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">
-                      {formatTime(currentTemp.timestamp)}
+                      {formatDate.timeOnly(currentTemp.timestamp)}
                     </span>
                   </div>
                 </div>
@@ -325,8 +311,9 @@ export default function TemperatureContent() {
                       </span>
                     </div>
                     <div className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span>{formatDate(reading.timestamp)}</span>
-                      <span>{formatTime(reading.timestamp)}</span>
+                      <span>
+                        {formatDate.readableDateTime(reading.timestamp)}
+                      </span>
                     </div>
                   </div>
                 ))}
