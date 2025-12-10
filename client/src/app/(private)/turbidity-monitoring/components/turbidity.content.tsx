@@ -4,10 +4,10 @@ import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 import { SocketContext } from '@/providers/socket-provider';
 import {
-  startTemperatureSimulation,
-  stopTemperatureSimulation,
-} from '@/api/protected/temperature-api/temperature-sensor.api';
-import { TemperatureData } from '@/api/protected/temperature-api/temperature-sensor.interface';
+  startTurbiditySimulation,
+  stopTurbiditySimulation,
+} from '@/api/protected/turbidity-api/turbidity-sensor.api';
+import { TurbidityData } from '@/api/protected/turbidity-api/turbidity-sensor.interface';
 import { showToastSuccess, showToastError } from '@/utils/toast-config';
 import { extractErrorMessage } from '@/configs/api.helper';
 import {
@@ -26,9 +26,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Thermometer,
-  Activity,
   Droplets,
+  Activity,
+  Eye,
   Clock,
   WifiOff,
   Play,
@@ -39,34 +39,35 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDate } from '@syntaxsentinel/date-utils';
 
 const chartConfig = {
-  temperature: {
-    label: 'Temperature',
-    color: 'hsl(var(--chart-1))',
+  turbidity: {
+    label: 'Turbidity',
+    color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig;
 
-export default function TemperatureContent() {
+export default function TurbidityContent() {
   const { socket } = useContext(SocketContext);
-  const [currentTemp, setCurrentTemp] = useState<TemperatureData | null>(null);
-  const [tempHistory, setTempHistory] = useState<TemperatureData[]>([]);
+  const [currentTurbidity, setCurrentTurbidity] =
+    useState<TurbidityData | null>(null);
+  const [turbidityHistory, setTurbidityHistory] = useState<TurbidityData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [status, setStatus] = useState<'optimal' | 'low' | 'high'>('optimal');
+  const [status, setStatus] = useState<'clear' | 'moderate' | 'murky'>('clear');
   const [loading, setLoading] = useState<boolean>(false);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
 
-  // Prepare chart data from temperature history
+  // Prepare chart data from turbidity history
   const chartData = useMemo(() => {
-    return tempHistory
+    return turbidityHistory
       .slice()
       .reverse()
       .map((reading, index) => {
         return {
           timestamp: formatDate.readableDateTime(reading.timestamp),
-          temperature: Number(reading.temperature),
+          turbidity: Number(reading.turbidity),
           index: index,
         };
       });
-  }, [tempHistory]);
+  }, [turbidityHistory]);
 
   useEffect(() => {
     if (!socket) return;
@@ -76,46 +77,46 @@ export default function TemperatureContent() {
     const handleConnect = () => setIsConnected(true);
     const handleDisconnect = () => setIsConnected(false);
 
-    const handleTemperatureData = (data: TemperatureData) => {
-      const tempData = {
+    const handleTurbidityData = (data: TurbidityData) => {
+      const turbidityData = {
         ...data,
         timestamp: new Date(data.timestamp),
       };
 
-      setCurrentTemp(tempData);
-      setTempHistory((prev) => [tempData, ...prev].slice(0, 20));
+      setCurrentTurbidity(turbidityData);
+      setTurbidityHistory((prev) => [turbidityData, ...prev].slice(0, 20));
 
       setIsSimulationRunning(true);
 
-      // Determine status based on temperature
-      if (tempData.temperature < 25) {
-        setStatus('low');
-      } else if (tempData.temperature > 32) {
-        setStatus('high');
+      // Determine status based on turbidity (0-50 NTU optimal range)
+      if (turbidityData.turbidity < 10) {
+        setStatus('clear');
+      } else if (turbidityData.turbidity > 40) {
+        setStatus('murky');
       } else {
-        setStatus('optimal');
+        setStatus('moderate');
       }
     };
 
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
-    socket.on('sensor:temperature', handleTemperatureData);
+    socket.on('sensor:turbidity', handleTurbidityData);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
-      socket.off('sensor:temperature', handleTemperatureData);
+      socket.off('sensor:turbidity', handleTurbidityData);
     };
   }, [socket]);
 
   const handleStart = async () => {
     setLoading(true);
     try {
-      const res = await startTemperatureSimulation();
+      const res = await startTurbiditySimulation();
       setIsSimulationRunning(true);
       showToastSuccess(
         'Monitoring Started',
-        res.message || 'Temperature monitoring started successfully',
+        res.message || 'Turbidity monitoring started successfully',
         'bottom-right',
       );
     } catch (error: unknown) {
@@ -132,11 +133,11 @@ export default function TemperatureContent() {
   const handleStop = async () => {
     setLoading(true);
     try {
-      const res = await stopTemperatureSimulation();
+      const res = await stopTurbiditySimulation();
       setIsSimulationRunning(false);
       showToastSuccess(
         'Monitoring Stopped',
-        res.message || 'Temperature monitoring stopped',
+        res.message || 'Turbidity monitoring stopped',
         'bottom-right',
       );
     } catch (error: unknown) {
@@ -152,23 +153,23 @@ export default function TemperatureContent() {
 
   const getStatusColor = () => {
     switch (status) {
-      case 'low':
-        return 'text-blue-500';
-      case 'high':
+      case 'clear':
+        return 'text-green-500';
+      case 'murky':
         return 'text-destructive';
-      case 'optimal':
-        return 'text-primary';
+      case 'moderate':
+        return 'text-yellow-500';
     }
   };
 
   const getStatusBadgeVariant = () => {
     switch (status) {
-      case 'low':
-        return 'secondary';
-      case 'high':
-        return 'destructive';
-      case 'optimal':
+      case 'clear':
         return 'default';
+      case 'murky':
+        return 'destructive';
+      case 'moderate':
+        return 'secondary';
     }
   };
 
@@ -191,10 +192,10 @@ export default function TemperatureContent() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Temperature Monitoring
+            Turbidity Monitoring
           </h1>
           <p className="text-muted-foreground">
-            Real-time water temperature tracking
+            Real-time water clarity tracking
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -237,29 +238,29 @@ export default function TemperatureContent() {
         </div>
       </div>
 
-      {/* Main Temperature Display */}
+      {/* Main Turbidity Display */}
       <Card className="border-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Thermometer className="w-5 h-5" />
-            Current Temperature
+            <Eye className="w-5 h-5" />
+            Current Turbidity
           </CardTitle>
-          <CardDescription>Fishpond water temperature sensor</CardDescription>
+          <CardDescription>Fishpond water clarity sensor</CardDescription>
         </CardHeader>
         <CardContent>
-          {currentTemp ? (
+          {currentTurbidity ? (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div
                     className={`text-6xl max-sm:text-2xl font-bold ${getStatusColor()}`}
                   >
-                    {currentTemp.temperature}°C
+                    {currentTurbidity.turbidity} {currentTurbidity.unit}
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">
-                      {formatDate.timeOnly(currentTemp.timestamp)}
+                      {formatDate.timeOnly(currentTurbidity.timestamp)}
                     </span>
                   </div>
                 </div>
@@ -268,7 +269,7 @@ export default function TemperatureContent() {
                     {status.toUpperCase()}
                   </Badge>
                   <div className="text-sm text-muted-foreground">
-                    {currentTemp.sensorId}
+                    {currentTurbidity.sensorId}
                   </div>
                 </div>
               </div>
@@ -277,26 +278,26 @@ export default function TemperatureContent() {
               <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground mb-1">
-                    Low Threshold
+                    Clear Water
                   </div>
-                  <div className="text-lg font-semibold text-blue-500">
-                    25°C
+                  <div className="text-lg font-semibold text-green-500">
+                    &lt;10 NTU
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground mb-1">
                     Optimal Range
                   </div>
-                  <div className="text-lg font-semibold text-primary">
-                    25-32°C
+                  <div className="text-lg font-semibold text-yellow-500">
+                    10-40 NTU
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground mb-1">
-                    High Threshold
+                    Murky Water
                   </div>
                   <div className="text-lg font-semibold text-destructive">
-                    32°C
+                    &gt;40 NTU
                   </div>
                 </div>
               </div>
@@ -304,7 +305,7 @@ export default function TemperatureContent() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <Droplets className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Waiting for temperature data...</p>
+              <p>Waiting for turbidity data...</p>
               <p className="text-sm mt-2">
                 Click &quot;Start Monitoring&quot; to begin monitoring
               </p>
@@ -313,15 +314,15 @@ export default function TemperatureContent() {
         </CardContent>
       </Card>
 
-      {/* Temperature Chart */}
+      {/* Turbidity Chart */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
-            Temperature Trend
+            Turbidity Trend
           </CardTitle>
           <CardDescription>
-            Real-time temperature visualization (last 20 readings)
+            Real-time turbidity visualization (last 20 readings)
           </CardDescription>
         </CardHeader>
         <CardContent className="px-2 sm:p-6">
@@ -352,24 +353,24 @@ export default function TemperatureContent() {
                     <ChartTooltipContent
                       className="w-[180px]"
                       formatter={(value, name, props) => {
-                        const temp = Number(value);
-                        return [`${temp.toFixed(2)}°C`, 'Temperature'];
+                        const turb = Number(value);
+                        return [`${turb.toFixed(2)} NTU`, 'Turbidity'];
                       }}
                     />
                   }
                 />
                 <Line
-                  dataKey="temperature"
+                  dataKey="turbidity"
                   type="monotone"
-                  stroke="#3b82f6"
+                  stroke="#10b981"
                   strokeWidth={3}
                   dot={{
-                    fill: '#3b82f6',
+                    fill: '#10b981',
                     r: 4,
                   }}
                   activeDot={{
                     r: 6,
-                    fill: '#2563eb',
+                    fill: '#059669',
                   }}
                 />
               </LineChart>
@@ -378,38 +379,38 @@ export default function TemperatureContent() {
             <div className="text-center py-12 text-muted-foreground">
               <p>No data available for chart</p>
               <p className="text-sm mt-2">
-                Start monitoring to see temperature trends
+                Start monitoring to see turbidity trends
               </p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Temperature History */}
+      {/* Turbidity History */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
             Recent Readings
           </CardTitle>
-          <CardDescription>Last 20 temperature measurements</CardDescription>
+          <CardDescription>Last 20 turbidity measurements</CardDescription>
         </CardHeader>
         <CardContent>
-          {tempHistory.length > 0 ? (
+          {turbidityHistory.length > 0 ? (
             <div
               className="overflow-y-auto"
               style={{ maxHeight: '30vh', minHeight: '200px' }}
             >
               <div className="space-y-2">
-                {tempHistory.map((reading, index) => (
+                {turbidityHistory.map((reading, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <Thermometer className="w-4 h-4 text-muted-foreground" />
+                      <Eye className="w-4 h-4 text-muted-foreground" />
                       <span className="font-semibold max-sm:text-sm">
-                        {reading.temperature}°C
+                        {reading.turbidity} {reading.unit}
                       </span>
                     </div>
                     <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -423,7 +424,7 @@ export default function TemperatureContent() {
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No temperature history available</p>
+              <p>No turbidity history available</p>
             </div>
           )}
         </CardContent>
@@ -433,45 +434,55 @@ export default function TemperatureContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Average Temp</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Average Turbidity
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tempHistory.length > 0
+              {turbidityHistory.length > 0
                 ? (
-                    tempHistory.reduce((sum, r) => sum + r.temperature, 0) /
-                    tempHistory.length
+                    turbidityHistory.reduce((sum, r) => sum + r.turbidity, 0) /
+                    turbidityHistory.length
                   ).toFixed(2)
-                : '0.00'}
-              °C
+                : '0.00'}{' '}
+              NTU
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Highest Temp</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Highest Turbidity
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tempHistory.length > 0
-                ? Math.max(...tempHistory.map((r) => r.temperature)).toFixed(2)
-                : '0.00'}
-              °C
+              {turbidityHistory.length > 0
+                ? Math.max(...turbidityHistory.map((r) => r.turbidity)).toFixed(
+                    2,
+                  )
+                : '0.00'}{' '}
+              NTU
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Lowest Temp</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Lowest Turbidity
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tempHistory.length > 0
-                ? Math.min(...tempHistory.map((r) => r.temperature)).toFixed(2)
-                : '0.00'}
-              °C
+              {turbidityHistory.length > 0
+                ? Math.min(...turbidityHistory.map((r) => r.turbidity)).toFixed(
+                    2,
+                  )
+                : '0.00'}{' '}
+              NTU
             </div>
           </CardContent>
         </Card>

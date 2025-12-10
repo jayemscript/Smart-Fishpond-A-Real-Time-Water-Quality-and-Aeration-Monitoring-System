@@ -13,6 +13,7 @@ import {
   TemperatureSensorService,
   TemperatureData,
 } from '../services/temperature-sensor.service';
+import { TurbiditySensorService } from '../services/turbidity-sensor.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
 
@@ -20,6 +21,7 @@ import { UpdateSensorDto } from '../dto/update-sensor.dto';
 export class SensorsController {
   constructor(
     private readonly temperatureSensorService: TemperatureSensorService,
+    private readonly turbiditySensorService: TurbiditySensorService,
   ) {}
 
   /**
@@ -43,12 +45,22 @@ export class SensorsController {
   }
 
   /**
-   * GET /sensors/temperature/status
-   * Check if simulation is running
-   * Test in Postman: GET http://localhost:3000/sensors/temperature/status
+   * POST /sensors/turbidity/start
+   * Start continious turbidity simulation
+   *
    */
-  @Get('temperature/status')
-  getSimulationStatus() {
-    return this.temperatureSensorService.getSimulationStatus();
+  @Post('turbidity/start')
+  startTurbiditySimulation() {
+    return this.turbiditySensorService.startTurbiditySimulation();
+  }
+
+  /**
+   * POST /sensors/turbidity/stop
+   * Stop Temperature simulation
+   *
+   */
+  @Post('turbidity/stop')
+  stopTurbiditySimulation() {
+    return this.turbiditySensorService.stopTurbiditySimulation();
   }
 }
