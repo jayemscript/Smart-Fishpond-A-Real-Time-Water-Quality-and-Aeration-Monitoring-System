@@ -56,6 +56,8 @@ export default function TemperatureContent() {
       setCurrentTemp(tempData);
       setTempHistory((prev) => [tempData, ...prev].slice(0, 20));
 
+      setIsSimulationRunning(true);
+
       // Determine status based on temperature
       if (tempData.temperature < 25) {
         setStatus('low');
