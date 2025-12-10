@@ -4,6 +4,9 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
@@ -11,6 +14,7 @@ import { SocketService } from './socket.service';
 import { UsersSocketService } from './users/users.socket.service';
 import { ModularSocketService } from './interfaces/modular-socket.service.interface';
 import { NotificationsSocketService } from './notifications/notifications.socket.service';
+import { TemperatureSensorService } from 'src/modules/sensors/services/temperature-sensor.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -29,8 +33,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly socketService: SocketService,
     private readonly usersSocketService: UsersSocketService,
     private readonly notificationSocketService: NotificationsSocketService,
+    private readonly temperatureSensorService: TemperatureSensorService,
   ) {
     this.domainServices = [usersSocketService];
+  }
+
+  @SubscribeMessage('sensor:temperature')
+  handleTemperature(@MessageBody() payload: any) {
+    return this.temperatureSensorService.handleTemperatureESP32(payload);
   }
 
   handleConnection(client: Socket) {
