@@ -114,7 +114,7 @@ export default function TemperatureContent() {
       const res = await startTemperatureSimulation();
       setIsSimulationRunning(true);
       showToastSuccess(
-        'Simulation Started',
+        'Monitoring Started',
         res.message || 'Temperature monitoring started successfully',
         'bottom-right',
       );
@@ -135,7 +135,7 @@ export default function TemperatureContent() {
       const res = await stopTemperatureSimulation();
       setIsSimulationRunning(false);
       showToastSuccess(
-        'Simulation Stopped',
+        'Monitoring Stopped',
         res.message || 'Temperature monitoring stopped',
         'bottom-right',
       );
@@ -306,7 +306,7 @@ export default function TemperatureContent() {
               <Droplets className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Waiting for temperature data...</p>
               <p className="text-sm mt-2">
-                Click &quot;Start Simulation&quot; to begin monitoring
+                Click &quot;Start Monitoring&quot; to begin monitoring
               </p>
             </div>
           )}
