@@ -14,6 +14,7 @@ import {
   TemperatureData,
 } from '../services/temperature-sensor.service';
 import { TurbiditySensorService } from '../services/turbidity-sensor.service';
+import { PhWaterSensorService } from '../services/ph-water-sensor.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
 
@@ -22,6 +23,7 @@ export class SensorsController {
   constructor(
     private readonly temperatureSensorService: TemperatureSensorService,
     private readonly turbiditySensorService: TurbiditySensorService,
+    private readonly phWaterSensorService: PhWaterSensorService,
   ) {}
 
   /**
@@ -62,5 +64,25 @@ export class SensorsController {
   @Post('turbidity/stop')
   stopTurbiditySimulation() {
     return this.turbiditySensorService.stopTurbiditySimulation();
+  }
+
+  /**
+   * POST /sensors/ph-water/start
+   * start continous ph-water monitoring
+   *
+   */
+  @Post('ph-water/start')
+  startPhWaterSimulation() {
+    return this.phWaterSensorService.startPhWaterSimulation();
+  }
+
+  /**
+   * POST /sensors/ph-water/stop
+   * Stop ph-water monitoring
+   *
+   */
+  @Post('ph-water/stop')
+  stopPhWaterSimulation() {
+    return this.phWaterSensorService.stopPhWaterSimulation();
   }
 }
