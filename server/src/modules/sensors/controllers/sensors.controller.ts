@@ -81,6 +81,7 @@ export class SensorsController {
    * Stop ph-water monitoring
    *
    */
+  @Post('ph-water/stop')
   stopPhWaterSimulation() {
     return this.phWaterSensorService.stopPhWaterSimulation();
   }
