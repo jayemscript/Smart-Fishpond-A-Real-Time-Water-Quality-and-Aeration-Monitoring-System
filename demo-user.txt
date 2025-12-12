@@ -24,3 +24,5 @@ role = Monitoring-Manager
 email = monitoringmanager.demo@mail.com
 password = @MonitoringManager#321
 passkey = 123456
+
+TEST
