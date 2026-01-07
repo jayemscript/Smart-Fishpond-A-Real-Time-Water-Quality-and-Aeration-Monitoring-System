@@ -93,12 +93,12 @@ export class TemperatureSensorService {
    */
   sendTemperatureData() {
     // SIMULATION MODE: Generate fake data
-    const data = this.generateTemperatureData();
+    // const data = this.generateTemperatureData();
 
     // ESP32 MODE: Use real data from ESP32
     // Uncomment these lines and comment out the line above when using ESP32:
-    // if (!this.latestESP32Data) return;
-    // const data = this.latestESP32Data;
+    if (!this.latestESP32Data) return;
+    const data = this.latestESP32Data;
 
     this.logger.log(
       `Broadcasting temperature: ${data.temperature}°C at ${data.timestamp.toISOString()}`,

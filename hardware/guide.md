@@ -7,3 +7,6 @@ hardware/            # ESP32 / Arduino hardware code
     │   └── temperature_sensor.cpp
     └── lib/                 # reusable libraries for ESP32 (WiFi, JSON, etc.)
 ```
+
+
+https://mosquitto.org/download/

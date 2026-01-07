@@ -6,7 +6,6 @@ SocketIOclient socketIO;
 const char* ssid = "WALANG SIGNAL-2G";
 const char* password = "PULMANO4586";
 
-// Socket.IO event handler
 void socketIOEvent(socketIOmessageType_t type, uint8_t * payload, size_t length) {
   switch (type) {
 
@@ -16,7 +15,6 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t * payload, size_t length)
 
     case sIOtype_CONNECT:
       Serial.println("Connected to Socket.IO server");
-      socketIO.send(sIOtype_CONNECT, "/");
       break;
 
     case sIOtype_EVENT:
@@ -28,9 +26,6 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t * payload, size_t length)
       Serial.print("Error: ");
       Serial.println((char*)payload);
       break;
-
-    default:
-      break;
   }
 }
 
@@ -38,21 +33,22 @@ void setup() {
   Serial.begin(115200);
 
   WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi");
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
   }
 
-  Serial.println("\nWiFi connected!");
-  Serial.println(WiFi.localIP());
+  WiFi.setSleep(false); 
 
-  // NestJS Socket.IO (v4)
-  socketIO.begin("192.168.100.90", 3000, "/socket.io/?EIO=4&transport=websocket");
+  socketIO.begin(
+    "192.168.100.90",
+    3005,
+    "/socket.io/?EIO=3&transport=websocket"
+  );
+
   socketIO.onEvent(socketIOEvent);
 }
 
 void loop() {
   socketIO.loop();
+  delay(1); // watchdog + WiFi stability
 }
