@@ -162,7 +162,7 @@ export default function TabSideBar({ isOpen, onClose }: TabSideBarProps) {
         ) : (
           <div
             ref={sidebarRef}
-            className="flex flex-col w-64 h-full p-5 space-y-6 shadow-lg bg-primary dark:bg-background text-accent dark:text-white relative"
+            className="flex flex-col w-64 h-full p-5 space-y-6 shadow-lg bg-secondary dark:bg-background text-accent dark:text-white relative"
           >
             <div className="flex items-center space-x-2 mb-6">
               <img src="/images/logo.webp" alt="Logo" className="h-8 w-8" />

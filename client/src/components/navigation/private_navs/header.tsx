@@ -67,7 +67,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }
 
   return (
-    <div className="relative bg-primary dark:bg-background p-2 flex justify-between items-center rounded-b-2xl mb-2">
+    <div className="relative bg-secondary dark:bg-background p-2 flex justify-between items-center rounded-b-2xl mb-2">
       <div className="flex items-center space-x-2 pl-2 md:pl-0">
         {onMenuClick && (
           <TooltipProvider>
