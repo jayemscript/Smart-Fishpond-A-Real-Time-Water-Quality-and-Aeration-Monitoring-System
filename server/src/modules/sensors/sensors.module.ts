@@ -9,7 +9,7 @@ import { SocketModule } from '../sockets/socket.module';
 
 @Module({
   imports: [SocketModule],
-  controllers: [SensorsController],
+  controllers: [SensorsController,],
   providers: [
     TemperatureSensorService,
     TurbiditySensorService,
