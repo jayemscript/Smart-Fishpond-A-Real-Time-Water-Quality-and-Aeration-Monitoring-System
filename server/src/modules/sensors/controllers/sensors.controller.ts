@@ -15,6 +15,7 @@ import {
 } from '../services/temperature-sensor.service';
 import { TurbiditySensorService } from '../services/turbidity-sensor.service';
 import { PhWaterSensorService } from '../services/ph-water-sensor.service';
+import { WaterLevelSensorService } from '../services/water-level-sensor.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
 
@@ -22,6 +23,7 @@ import { UpdateSensorDto } from '../dto/update-sensor.dto';
 export class SensorsController {
   constructor(
     private readonly temperatureSensorService: TemperatureSensorService,
+    private readonly waterLevelSensorService: WaterLevelSensorService,
     private readonly turbiditySensorService: TurbiditySensorService,
     private readonly phWaterSensorService: PhWaterSensorService,
   ) {}
@@ -44,6 +46,24 @@ export class SensorsController {
   @Post('temperature/stop')
   stopTemperatureBroadcasting() {
     return this.temperatureSensorService.stopTemperatureBroadcasting();
+  }
+
+  /**
+   * POST /sensors/water-level/start
+   * Start continous water level
+   */
+  @Post('water-level/start')
+  startWaterlevelBroadcasting() {
+    return this.waterLevelSensorService.startWaterlevelBroadcasting();
+  }
+
+  /**
+   * POST /sensors/water-level/stop
+   * Stop continous water level
+   */
+  @Post('water-level/stop')
+  stopWaterlevelBroadcastng() {
+    return this.waterLevelSensorService.stopWaterlevelBroadcastng();
   }
 
   /**
@@ -86,7 +106,6 @@ export class SensorsController {
     return this.phWaterSensorService.stopPhBroadcasting();
   }
 
-
   // new
   // // POST /sensors/temperature/data
   // @Post('temperature/data')
@@ -94,7 +113,6 @@ export class SensorsController {
   // // Calls existing service method
   // return this.temperatureSensorService.handleTemperatureESP32(payload);
   // }
-
 
   /**
    * Unified endpoint for all sensor data from ESP32
@@ -117,5 +135,4 @@ export class SensorsController {
         return { status: 'error', message: 'Unknown sensor type' };
     }
   }
-
 }
