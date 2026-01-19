@@ -11,7 +11,6 @@ import { CheckIcon, XIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import RolePicker from './role-picker';
 import PermissionPicker from './permission-picker';
-import EmployeePicker from './employee-picker';
 import AccessPicker from './access-picker';
 import { OTPInput, SlotProps } from 'input-otp';
 import { cn } from '@/lib/utils';

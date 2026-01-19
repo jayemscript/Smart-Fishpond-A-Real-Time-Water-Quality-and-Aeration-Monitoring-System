@@ -1,5 +1,4 @@
 import { Permissions } from './rbac-api.interface';
-import { StudentRecord } from '@/api/protected/student-api/interfaces/student.interface';
 
 export interface getAllPaginatedUser {
   status: string;
@@ -30,7 +29,6 @@ export interface UserData {
   password: string;
   passKey: string;
   access?: string[];
-  studentId?: StudentRecord;
   employeeId: {
     id: string;
     employeeId: string;
