@@ -1,5 +1,3 @@
-import { EmployeeData } from './employee-api.interface';
-
 // User data returned after login
 export interface AuthUser {
   id: string;
@@ -53,7 +51,6 @@ export interface AuthCheckResponse {
     version: number;
     deletedAt: string | null;
   };
-  employeeId: EmployeeData | null;
   permissions: [
     {
       id: string;

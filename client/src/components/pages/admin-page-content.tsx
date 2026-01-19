@@ -5,10 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import UsersTable from '@/containers/users-containers/users-table';
 import RolesTable from '@/containers/rbac-containers/roles-table';
 import PermissionsTable from '@/containers/rbac-containers/permissions-table';
-import EmployeeTable from '@/containers/employee-containers/employee-table';
 import AuditLogsTable from '@/containers/audit-logs-containers/audit-logs-table';
 import TabsComponent from '@/components/customs/tabs/tabs-component';
-import { UsersIcon, ShieldIcon, KeyRound, IdCardLanyard, Logs } from 'lucide-react';
+import {
+  UsersIcon,
+  ShieldIcon,
+  KeyRound,
+  IdCardLanyard,
+  Logs,
+} from 'lucide-react';
 import { useAuthCheck } from '@/hooks/use-auth-check.hooks';
 import { getUserById } from '@/api/protected/user.api';
 import { canAccess } from '@/utils/check-access';
@@ -107,12 +112,6 @@ function AdminPageContent() {
       label: 'Permissions',
       icon: KeyRound,
       component: <PermissionsTable />,
-    },
-    {
-      value: 'employees',
-      label: 'Employees',
-      icon: IdCardLanyard,
-      component: <EmployeeTable />,
     },
     {
       value: 'audits_logs',
