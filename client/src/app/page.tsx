@@ -4,8 +4,8 @@ import HomeSection from '@/components/pages/home-page/home-section';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Login | RVTM AMS',
-  description: 'Sign in to access the RVTM AMS system',
+  title: 'Login',
+  description: 'Sign in to access the system',
 };
 
 export default async function Home() {
