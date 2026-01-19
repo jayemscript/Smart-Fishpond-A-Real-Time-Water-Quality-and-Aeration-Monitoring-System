@@ -41,7 +41,7 @@ const LoginPageContent = async () => {
             />
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
-                Smart Pond
+                Pond Watch
               </h1>
               <p className="text-lg text-gray-600 dark:text-primary font-medium drop-shadow-sm">
                 A Real-Time Water Quality and Aeration Monitoring System
@@ -129,7 +129,7 @@ const LoginPageContent = async () => {
         <div className="w-full max-w-md relative z-2">
           {/* Header */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold ">Smart Pond Login</h2>
+            <h2 className="text-3xl font-bold "> Pond Watch Login</h2>
             <p className="text-sm  mt-2">
               Access your account to manage and monitor.
             </p>
