@@ -24,7 +24,7 @@ const getIconForLabel = (label: string): React.ReactNode => {
     Notifications: <FaBullhorn />,
     Announcements: <FaBullhorn />,
     'Temperature Monitoring': <FaTemperatureFull />,
-    'Turbidity Monitoring': <FaDroplet />,
+    // 'Turbidity Monitoring': <FaDroplet />,
     'ph Water Monitoring': <FaFlask />,
     'Water Level Monitoring': <FaGauge />,
     'Dissolved Oxygen Monitoring': <FaGauge />,
@@ -68,11 +68,11 @@ const menuConfig = {
     role: [],
   },
 
-  turbidityMonitoring: {
-    path: '/turbidity-monitoring',
-    label: 'Turbidity Monitoring',
-    role: [],
-  },
+  // turbidityMonitoring: {
+  //   path: '/turbidity-monitoring',
+  //   label: 'Turbidity Monitoring',
+  //   role: [],
+  // },
 
   phWaterMonitoring: {
     path: '/ph-water-monitoring',
@@ -112,7 +112,7 @@ export const AdministrativeMenuItems: MenuItems[] = createMenuItems([
   'adminPermissions',
   'adminAuditLogs',
   'temperatureMonitoring',
-  'turbidityMonitoring',
+  // 'turbidityMonitoring',
   'phWaterMonitoring',
   'waterLevelMonitoring',
   'dissolvedOxygen',
@@ -125,7 +125,7 @@ export const ResearcherMenuItems: MenuItems[] = createMenuItems([
   'adminPermissions',
   'adminAuditLogs',
   'temperatureMonitoring',
-  'turbidityMonitoring',
+  // 'turbidityMonitoring',
   'phWaterMonitoring',
   'waterLevelMonitoring',
   'dissolvedOxygen',
@@ -134,7 +134,7 @@ export const ResearcherMenuItems: MenuItems[] = createMenuItems([
 export const FishPondOperatorMenutItems: MenuItems[] = createMenuItems([
   'dashboard',
   'temperatureMonitoring',
-  'turbidityMonitoring',
+  // 'turbidityMonitoring',
   'phWaterMonitoring',
   'waterLevelMonitoring',
   'dissolvedOxygen',
@@ -147,7 +147,7 @@ export const MonitoringManagerMenutItems: MenuItems[] = createMenuItems([
   'adminPermissions',
   'adminAuditLogs',
   'temperatureMonitoring',
-  'turbidityMonitoring',
+  // 'turbidityMonitoring',
   'phWaterMonitoring',
   'waterLevelMonitoring',
   'dissolvedOxygen',

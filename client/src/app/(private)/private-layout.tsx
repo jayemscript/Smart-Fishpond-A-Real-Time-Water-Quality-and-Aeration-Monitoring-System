@@ -62,7 +62,13 @@ export default function PrivateLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 bg-background dark:bg-primary p-3">
-          <div className="rounded-xl bg-linear-to-br from-background to-muted/20 h-full p-5">
+          {/* <div className="rounded-xl bg-linear-to-br from-background to-muted/20 h-full p-5"> */}
+            <div
+  style={{
+    backgroundImage: "url('/images/background.jpg')",
+  }}
+  className="rounded-xl h-full p-5 bg-cover bg-center"
+>
             {children}
           </div>
         </div>

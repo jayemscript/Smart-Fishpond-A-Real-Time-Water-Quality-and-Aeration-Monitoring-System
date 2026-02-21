@@ -6,7 +6,13 @@ import { ThemeButtons } from '@/components/customs/theme-buttons';
 
 export default function HomeSection() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    // <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div 
+          style={{
+    backgroundImage: "url('/images/background-2.jpg')",
+
+  }}
+        className="min-h-screen  text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-no-repeat bg-center bg-cover">
       <div className="max-w-7xl w-full">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Side */}

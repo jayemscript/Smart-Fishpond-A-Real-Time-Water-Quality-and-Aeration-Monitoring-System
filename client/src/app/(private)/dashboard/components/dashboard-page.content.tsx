@@ -34,9 +34,9 @@ export default function DashboardPageContent() {
           </div>
         </div>
 
-        <div className="m-5 p-5 space-y-4">
+        {/* <div className="m-5 p-5 space-y-4">
           <UserListOnline />
-        </div>
+        </div> */}
       </div>
     </div>
   );

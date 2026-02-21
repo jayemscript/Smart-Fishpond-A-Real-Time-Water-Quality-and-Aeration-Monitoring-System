@@ -16,6 +16,7 @@ import {
 import { TurbiditySensorService } from '../services/turbidity-sensor.service';
 import { PhWaterSensorService } from '../services/ph-water-sensor.service';
 import { WaterLevelSensorService } from '../services/water-level-sensor.service';
+import { DissolvedOxygenSensorService } from '../services/do.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
 
@@ -26,6 +27,7 @@ export class SensorsController {
     private readonly waterLevelSensorService: WaterLevelSensorService,
     private readonly turbiditySensorService: TurbiditySensorService,
     private readonly phWaterSensorService: PhWaterSensorService,
+    private readonly doService: DissolvedOxygenSensorService,
   ) {}
 
   /**
@@ -106,6 +108,24 @@ export class SensorsController {
     return this.phWaterSensorService.stopPhBroadcasting();
   }
 
+  /**
+   * POST /sensors/do/start
+   * start continous do monitoring
+   */
+  @Post('do/start')
+  startDoBroadcasting() {
+    return this.doService.startDoBroadcasting();
+  }
+
+  /**
+   * POST /sensors/do/stop
+   * stop continous do monitoring
+   */
+  @Post('do/stop')
+  stopDoBroadcasting() {
+    return this.doService.startDoBroadcasting();
+  }
+
   // new
   // // POST /sensors/temperature/data
   // @Post('temperature/data')
@@ -130,6 +150,12 @@ export class SensorsController {
 
       case 'phWater':
         return this.phWaterSensorService.handlePhWaterESP32(payload);
+
+      case 'waterLevel':
+        return this.waterLevelSensorService.handleWaterLevelESP32(payload);
+
+      case 'do':
+        return this.doService.handleDissolvedOxygenESP32(payload);
 
       default:
         return { status: 'error', message: 'Unknown sensor type' };

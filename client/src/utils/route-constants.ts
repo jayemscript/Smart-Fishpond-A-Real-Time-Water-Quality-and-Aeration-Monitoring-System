@@ -41,7 +41,7 @@ const allRoutes = [
   { label: 'Account Information', value: '/account' },
   { label: 'Notifications', value: '/notifications' },
   { label: 'Temperature Monitoring', value: '/temperature-monitoring' },
-  { label: 'Turbidity Monitoring', value: '/turbidity-monitoring' },
+  // { label: 'Turbidity Monitoring', value: '/turbidity-monitoring' },
   { label: 'pH Water Monitoring', value: '/ph-water-monitoring' },
   { label: 'Water Level Monitoring', value: '/water-level-monitoring' },
   { label: 'Dissolved Oxygen Monitoring', value: '/do-monitoring' },

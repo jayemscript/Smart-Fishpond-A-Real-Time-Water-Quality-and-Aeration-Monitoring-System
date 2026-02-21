@@ -57,18 +57,6 @@ export default function HelpPageContent() {
             ]}
           />
 
-          <ModuleCard
-            icon={<Circle />}
-            title="Turbidity Monitoring"
-            description="Measures water clarity by detecting suspended particles that affect light penetration."
-            optimal="20 – 50 NTU"
-            alert="Alerts above 80 NTU or below 10 NTU"
-            tips={[
-              'High turbidity may indicate overfeeding',
-              'Low turbidity reduces natural food availability',
-              'Monitor after rainfall',
-            ]}
-          />
 
           <ModuleCard
             icon={<Droplets />}

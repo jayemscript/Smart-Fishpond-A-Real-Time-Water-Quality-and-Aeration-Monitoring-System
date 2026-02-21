@@ -5,6 +5,7 @@ import { TemperatureSensorService } from './services/temperature-sensor.service'
 import { TurbiditySensorService } from './services/turbidity-sensor.service';
 import { PhWaterSensorService } from './services/ph-water-sensor.service';
 import { WaterLevelSensorService } from './services/water-level-sensor.service';
+import { DissolvedOxygenSensorService } from './services/do.service';
 import { SensorsController } from './controllers/sensors.controller';
 import { SocketModule } from '../sockets/socket.module';
 
@@ -16,12 +17,14 @@ import { SocketModule } from '../sockets/socket.module';
     TurbiditySensorService,
     PhWaterSensorService,
     WaterLevelSensorService,
+    DissolvedOxygenSensorService,
   ],
   exports: [
     TemperatureSensorService,
     TurbiditySensorService,
     PhWaterSensorService,
     WaterLevelSensorService,
+    DissolvedOxygenSensorService,
   ],
 })
 export class SensorsModule {}
