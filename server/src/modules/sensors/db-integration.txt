@@ -1,0 +1,140 @@
+// ─── Example: temperature-sensor.service.ts (updated) ────────────────────────
+// Only showing the relevant changes. Apply the same pattern to the other three
+// sensor services (ph-water-sensor, water-level-sensor, do.service).
+
+import { Injectable, Logger } from '@nestjs/common';
+import { SocketService } from 'src/modules/sockets/socket.service';
+import { SensorRecordsService } from './sensor-records.service'; // 👈 import
+
+export interface TemperatureData {
+  temperature: number;
+  timestamp: Date;
+  sensorId: string;
+  unit: string;
+}
+
+@Injectable()
+export class TemperatureSensorService {
+  private readonly logger = new Logger(TemperatureSensorService.name);
+  private latestESP32Data: TemperatureData | null = null;
+  private broadcastingEnabled = false;
+
+  constructor(
+    private readonly socketService: SocketService,
+    private readonly sensorRecordsService: SensorRecordsService, // 👈 inject
+  ) {}
+
+  startTemperatureBroadcasting() {
+    if (this.broadcastingEnabled) {
+      this.logger.warn('Temperature broadcasting is already running');
+      return { message: 'Broadcasting already running' };
+    }
+    this.broadcastingEnabled = true;
+    this.logger.log('Started temperature broadcasting from ESP32');
+    return { message: 'Temperature broadcasting started' };
+  }
+
+  stopTemperatureBroadcasting() {
+    if (!this.broadcastingEnabled) {
+      this.logger.warn('Temperature broadcasting is already stopped');
+      return { message: 'No broadcasting running' };
+    }
+    this.broadcastingEnabled = false;
+    this.logger.log('Stopped temperature broadcasting');
+    return { message: 'Temperature broadcasting stopped' };
+  }
+
+  async handleTemperatureESP32(payload: any) {
+    // 👈 now async
+    const data: TemperatureData = {
+      temperature: payload.data.temperature,
+      timestamp: new Date(),
+      sensorId: payload.data.sensorId,
+      unit: payload.data.unit,
+    };
+
+    this.latestESP32Data = data;
+
+    if (!this.broadcastingEnabled) {
+      this.logger.debug('Received ESP32 data but broadcasting is stopped');
+      return { status: 'broadcasting stopped' };
+    }
+
+    this.logger.log(
+      `ESP32 temperature: ${data.temperature}°C from ${data.sensorId}`,
+    );
+
+    // 👇 Save to DB and broadcast in parallel
+    await Promise.all([
+      this.sensorRecordsService.saveTemperatureRecord(data),
+      this.socketService.broadcast('sensor:temperature', data),
+    ]);
+
+    return { status: 'received' };
+  }
+
+  onModuleDestroy() {
+    this.stopTemperatureBroadcasting();
+  }
+}
+
+// ─── sensors.module.ts (updated) ─────────────────────────────────────────────
+
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TemperatureSensorService } from './services/temperature-sensor.service';
+import { TurbiditySensorService } from './services/turbidity-sensor.service';
+import { PhWaterSensorService } from './services/ph-water-sensor.service';
+import { WaterLevelSensorService } from './services/water-level-sensor.service';
+import { DissolvedOxygenSensorService } from './services/do.service';
+import { SensorRecordsService } from './services/sensor-records.service'; // 👈
+import { SensorsController } from './controllers/sensors.controller';
+import { SocketModule } from '../sockets/socket.module';
+import { TemperatureRecord } from './entities/temperature.entity'; // 👈
+import { WaterLevelRecords } from './entities/water-level.entity'; // 👈
+import { PhLevelRecords } from './entities/ph-level.entity'; // 👈
+import { DissolvedOxygenRecords } from './entities/do.entity'; // 👈
+
+@Module({
+  imports: [
+    SocketModule,
+    TypeOrmModule.forFeature([
+      // 👈
+      TemperatureRecord,
+      WaterLevelRecords,
+      PhLevelRecords,
+      DissolvedOxygenRecords,
+    ]),
+  ],
+  controllers: [SensorsController],
+  providers: [
+    TemperatureSensorService,
+    TurbiditySensorService,
+    PhWaterSensorService,
+    WaterLevelSensorService,
+    DissolvedOxygenSensorService,
+    SensorRecordsService, // 👈
+  ],
+  exports: [
+    TemperatureSensorService,
+    TurbiditySensorService,
+    PhWaterSensorService,
+    WaterLevelSensorService,
+    DissolvedOxygenSensorService,
+    SensorRecordsService, // 👈 export so other modules can call getReports()
+  ],
+})
+export class SensorsModule {}
+
+// ─── Example controller endpoint for reports ─────────────────────────────────
+//
+// GET /sensors/reports?sensor=temperature&limit=10&sensorId=ESP32-A1
+//
+// @Get('reports')
+// async getReports(
+//   @Query('sensor') sensor: SensorType,
+//   @Query('limit') limit = 10,
+//   @Query('sensorId') sensorId?: string,
+// ) {
+//   return this.sensorRecordsService.getReports(sensor, +limit, sensorId);
+// }
