@@ -1,5 +1,5 @@
 export interface WaterLevelData {
-  level: string;
+  level: number;
   timestamp: Date;
   sensorId: string;
   status: string;

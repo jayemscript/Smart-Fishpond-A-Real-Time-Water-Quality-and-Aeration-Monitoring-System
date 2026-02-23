@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
 
 export interface WaterLevelData {
-  level: string;
+  level: number;
   timestamp: Date;
   sensorId: string;
   status: string;
