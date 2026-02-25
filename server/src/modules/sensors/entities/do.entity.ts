@@ -23,7 +23,7 @@ export class DissolvedOxygenRecords extends BaseEntity {
     type: 'float',
     nullable: false,
   })
-  value: number;
+  oxygenLevel: number;
 
   @Column({
     name: 'timestamp',
