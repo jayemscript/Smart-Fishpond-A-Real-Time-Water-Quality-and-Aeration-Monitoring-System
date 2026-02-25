@@ -44,14 +44,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+function getWaterStatus(level: number): 'low' | 'stable' {
+  return level === 1 ? 'stable' : 'low';
+}
+
 export default function WaterLevelContent() {
   const { socket } = useContext(SocketContext);
 
   const [currentLevel, setCurrentLevel] = useState<WaterLevelData | null>(null);
   const [history, setHistory] = useState<WaterLevelData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
+  const [status, setStatus] = useState<'low' | 'stable'>('stable');
   const [loading, setLoading] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
 
   const chartData = useMemo(() => {
     return history
@@ -59,7 +64,7 @@ export default function WaterLevelContent() {
       .reverse()
       .map((reading, index) => ({
         timestamp: formatDate.readableDateTime(reading.timestamp),
-        waterLevel: reading.level === 'Up' ? 1 : 0,
+        waterLevel: reading.level,
         index,
       }));
   }, [history]);
@@ -69,10 +74,10 @@ export default function WaterLevelContent() {
 
     setIsConnected(socket.connected);
 
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
+    const handleConnect = () => setIsConnected(true);
+    const handleDisconnect = () => setIsConnected(false);
 
-    const onWaterLevel = (data: WaterLevelData) => {
+    const handleWaterData = (data: WaterLevelData) => {
       const parsed = {
         ...data,
         timestamp: new Date(data.timestamp),
@@ -80,17 +85,18 @@ export default function WaterLevelContent() {
 
       setCurrentLevel(parsed);
       setHistory((prev) => [parsed, ...prev].slice(0, 20));
+      setStatus(getWaterStatus(parsed.level));
       setIsRunning(true);
     };
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('sensor:water-level', onWaterLevel);
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('sensor:water-level', handleWaterData);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('sensor:water-level', onWaterLevel);
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('sensor:water-level', handleWaterData);
     };
   }, [socket]);
 
@@ -99,11 +105,7 @@ export default function WaterLevelContent() {
     try {
       const res = await startWaterLevel();
       setIsRunning(true);
-      showToastSuccess(
-        'Monitoring Started',
-        res.message || 'Water level monitoring started',
-        'bottom-right',
-      );
+      showToastSuccess('Monitoring Started', res.message, 'bottom-right');
     } catch (err) {
       showToastError(
         'Operation Failed',
@@ -120,11 +122,7 @@ export default function WaterLevelContent() {
     try {
       const res = await stopWaterLevel();
       setIsRunning(false);
-      showToastSuccess(
-        'Monitoring Stopped',
-        res.message || 'Water level monitoring stopped',
-        'bottom-right',
-      );
+      showToastSuccess('Monitoring Stopped', res.message, 'bottom-right');
     } catch (err) {
       showToastError(
         'Operation Failed',
@@ -136,8 +134,9 @@ export default function WaterLevelContent() {
     }
   };
 
-  const statusVariant =
-    currentLevel?.status === 'bad' ? 'destructive' : 'default';
+  const getStatusBadgeVariant = (): 'default' | 'destructive' => {
+    return status === 'low' ? 'destructive' : 'default';
+  };
 
   if (!socket || !isConnected) {
     return (
@@ -161,7 +160,7 @@ export default function WaterLevelContent() {
             Water Level Monitoring
           </h1>
           <p className="text-muted-foreground">
-            Real-time water level tracking
+            Real-time float switch monitoring
           </p>
         </div>
 
@@ -204,13 +203,13 @@ export default function WaterLevelContent() {
             <Droplets className="w-5 h-5" />
             Current Water Level
           </CardTitle>
-          <CardDescription>Water level sensor</CardDescription>
+          <CardDescription>Float switch sensor</CardDescription>
         </CardHeader>
         <CardContent>
           {currentLevel ? (
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-5xl font-bold">{currentLevel.level}</div>
+                <div className="text-5xl font-bold">{status.toUpperCase()}</div>
                 <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4" />
                   {formatDate.timeOnly(currentLevel.timestamp)}
@@ -218,8 +217,8 @@ export default function WaterLevelContent() {
               </div>
 
               <div className="text-right">
-                <Badge variant={statusVariant} className="mb-2">
-                  {currentLevel.status.toUpperCase()}
+                <Badge variant={getStatusBadgeVariant()} className="mb-2">
+                  {status.toUpperCase()}
                 </Badge>
                 <div className="text-sm text-muted-foreground">
                   {currentLevel.sensorId}
@@ -228,14 +227,13 @@ export default function WaterLevelContent() {
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              <Droplets className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              Waiting for water level data…
+              Waiting for water level data...
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Chart */}
+      {/* Trend Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Water Level Trend</CardTitle>
@@ -251,7 +249,7 @@ export default function WaterLevelContent() {
                   content={
                     <ChartTooltipContent
                       formatter={(value) => [
-                        value === 1 ? 'Up' : 'Down',
+                        value === 1 ? 'Stable' : 'Low',
                         'Water Level',
                       ]}
                     />
@@ -269,6 +267,56 @@ export default function WaterLevelContent() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               No data available
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Water Level History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Recent Readings
+          </CardTitle>
+          <CardDescription>Last 20 water level measurements</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {history.length > 0 ? (
+            <div
+              className="overflow-y-auto"
+              style={{ maxHeight: '30vh', minHeight: '200px' }}
+            >
+              <div className="space-y-2">
+                {history.map((reading, index) => {
+                  const s = reading.level === 1 ? 'stable' : 'low';
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Droplets className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-semibold">{s.toUpperCase()}</span>
+                        <Badge
+                          variant={s === 'low' ? 'destructive' : 'default'}
+                          className="text-xs"
+                        >
+                          {s.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatDate.readableDateTime(reading.timestamp)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No water level history available
             </div>
           )}
         </CardContent>
