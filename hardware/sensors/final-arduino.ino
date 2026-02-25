@@ -1,61 +1,71 @@
+// ===== ARDUINO UNO/NANO (Fishpond sender) =====
+// Sends: TEMP= , PH= , DO= , FLOAT=  to ESP32 over SoftwareSerial TX on D4
+//
+// Wiring to ESP32:
+//  Arduino D4 (TX) -> voltage divider -> ESP32 RX2 (GPIO16)
+//  Arduino GND -> ESP32 GND (direct)
+//
+// DS18B20:
+//  Data -> D2, 4.7k pullup from D2 to 5V
+//
+// Float switch:
+//  One side -> D3, other -> GND (INPUT_PULLUP)
+//
+// pH sensor analog -> ADS1115 A0 (I2C address 0x48)
+// DO sensor analog -> A1
+//
+// LCD I2C: address 0x27, 16x2
+
 #include <Wire.h>
-#include <Adafruit_ADS1X15.h>
 #include <LiquidCrystal_I2C.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <SoftwareSerial.h>
+#include <Adafruit_ADS1X15.h>
 
-Adafruit_ADS1115 ads;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// ===== PIN DEFINITIONS =====
-const int FLOAT_PIN     = 2;
-const int ONE_WIRE_BUS  = 3;
+const int FLOAT_PIN     = 3;
+const int ONE_WIRE_BUS  = 2;
 const int DO_PIN        = A1;
-const int PH_CH         = 0;
+// PH_PIN removed - now using ADS1115
 
-// ===== TEMPERATURE =====
+// UART to ESP32 via D4
+const int TX_TO_ESP = 4;
+SoftwareSerial espSerial(-1, TX_TO_ESP); // RX unused, TX on D4
+
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-// ===== ADS GAIN =====
-adsGain_t GAIN = GAIN_ONE;
+Adafruit_ADS1115 ads; // ADS1115 default I2C address 0x48
 
-// ===== pH CALIBRATION =====
+// ---- Calibration (keep your values) ----
 float phSlope  = -5.77;
 float phOffset = 22.25;
-
-// ===== DO CALIBRATION (UPDATED) =====
-// 1.66V in air at ~27°C ≈ 8.1 mg/L
 float doSlope  = 4.88;
 float doOffset = 0.00;
 
-// ===== Arduino ADC settings =====
 const float AREF_V = 5.0;
 const int ADC_MAX  = 1023;
 
-// ===== WARNING THRESHOLDS =====
+// ADS1115 at gain 1x: full scale = 4.096V, 16-bit signed = 32767 counts
+const float ADS_GAIN_V   = 4.096;
+const int   ADS_ADC_MAX  = 32767;
+
+// ---- Thresholds for LCD status ----
 const float DO_MIN   = 4.5;
 const float PH_MIN   = 6.5;
 const float TEMP_MIN = 25.0;
 const float TEMP_MAX = 31.0;
 
-// ===== SCREEN CYCLING =====
 const unsigned long SCREEN_TIME = 5000;
 unsigned long lastScreenChange = 0;
 
-// ===== ESP32 COMMUNICATION =====
 const unsigned long SEND_INTERVAL = 3000;
 unsigned long lastSend = 0;
 
-// Screens:
-// 0 = STATUS
-// 1 = pH
-// 2 = FLOAT
-// 3 = TEMP
-// 4 = DO
 int screenIndex = 0;
 
-// ===== FLOAT SWITCH =====
 bool readFloatSwitchDebounced() {
   static bool stableState = HIGH;
   static bool lastReading = HIGH;
@@ -76,18 +86,16 @@ bool readFloatSwitchDebounced() {
   return stableState;
 }
 
-// ===== READ pH FROM ADS =====
-float readVoltageADS(int channel, int samples = 50) {
+float readVoltageAnalogPH(int samples = 50) {
   long sum = 0;
   for (int i = 0; i < samples; i++) {
-    sum += ads.readADC_SingleEnded(channel);
+    sum += ads.readADC_SingleEnded(0); // ADS1115 channel 0 for pH
     delay(8);
   }
-  float avgCounts = sum / (float)samples;
-  return ads.computeVolts((int16_t)avgCounts);
+  float avg = sum / (float)samples;
+  return (avg * ADS_GAIN_V) / ADS_ADC_MAX;
 }
 
-// ===== READ DO FROM ARDUINO ADC =====
 float readVoltageAnalog(int pin, int samples = 50) {
   long sum = 0;
   for (int i = 0; i < samples; i++) {
@@ -98,25 +106,23 @@ float readVoltageAnalog(int pin, int samples = 50) {
   return (avg * AREF_V) / ADC_MAX;
 }
 
-// ===== SEND DATA TO ESP32 =====
 void sendToESP32(float temp, float ph, float doMgL, bool floatState) {
-  Serial.print("TEMP=");
-  Serial.println(temp, 2);
-  
-  Serial.print("PH=");
-  Serial.println(ph, 2);
-  
-  Serial.print("DO=");
-  Serial.println(doMgL, 2);
-  
-  Serial.print("FLOAT=");
-  Serial.println(floatState ? "HIGH" : "LOW");
+  // EXACT format expected by ESP32 code
+  espSerial.print("TEMP=");  espSerial.println(temp, 2);
+  espSerial.print("PH=");    espSerial.println(ph, 2);
+  espSerial.print("DO=");    espSerial.println(doMgL, 2);
+  espSerial.print("FLOAT="); espSerial.println(floatState ? 1 : 0);
 }
 
 void setup() {
-  Serial.begin(9600);
+  // ESP link
+  espSerial.begin(9600);
+
   Wire.begin();
   pinMode(FLOAT_PIN, INPUT_PULLUP);
+
+  ads.setGain(GAIN_ONE); // +/-4.096V range
+  ads.begin();
 
   lcd.init();
   lcd.backlight();
@@ -124,23 +130,18 @@ void setup() {
   delay(1500);
   lcd.clear();
 
-  if (!ads.begin()) {
-    lcd.print("ADS ERROR");
-    while (1);
-  }
-  ads.setGain(GAIN);
-
   sensors.begin();
 }
 
 void loop() {
   unsigned long now = millis();
 
+  // ---- Read sensors ----
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
   bool tempValid = (tempC > -55 && tempC < 125);
 
-  float phV = readVoltageADS(PH_CH);
+  float phV = readVoltageAnalogPH();
   float ph = phSlope * phV + phOffset;
   ph = constrain(ph, 0, 14);
 
@@ -151,20 +152,17 @@ void loop() {
   bool floatState = readFloatSwitchDebounced();
   bool waterStable = (floatState == HIGH);
 
-  // ===== SEND TO ESP32 =====
+  // ---- Send to ESP32 every 3s ----
   if (now - lastSend >= SEND_INTERVAL) {
     sendToESP32(tempC, ph, doMgL, floatState);
     lastSend = now;
   }
 
-  // ===== CHECK WARNINGS =====
+  // ---- LCD warnings ----
   bool warning = false;
   String cause = "";
 
-  if (ph < PH_MIN) {
-    warning = true;
-    cause += "pH";
-  }
+  if (ph < PH_MIN) { warning = true; cause += "pH"; }
 
   if (doMgL < DO_MIN) {
     if (warning) cause += ", ";
@@ -178,32 +176,27 @@ void loop() {
     cause += "TEMP";
   }
 
-  // ===== SCREEN TIMER =====
+  // ---- Screen rotation ----
   if (now - lastScreenChange >= SCREEN_TIME) {
     screenIndex = (screenIndex + 1) % 5;
     lastScreenChange = now;
     lcd.clear();
   }
 
-  // ===== LCD DISPLAY =====
   switch (screenIndex) {
-
-    case 0: // STATUS
+    case 0:
       lcd.setCursor(0, 0);
       lcd.print("FISHPOND STATUS");
-
       lcd.setCursor(0, 1);
-      if (!warning) {
-        lcd.print("STABLE         ");
-      } else {
+      if (!warning) lcd.print("STABLE         ");
+      else {
         String line = "CAUSE: " + cause;
-        if (line.length() > 16)
-          line = line.substring(0, 16);
+        if (line.length() > 16) line = line.substring(0, 16);
         lcd.print(line);
       }
       break;
 
-    case 1: // pH
+    case 1:
       lcd.setCursor(0, 0);
       lcd.print("pH LEVEL");
       lcd.setCursor(0, 1);
@@ -212,14 +205,14 @@ void loop() {
       lcd.print("        ");
       break;
 
-    case 2: // FLOAT
+    case 2:
       lcd.setCursor(0, 0);
       lcd.print("WATER LEVEL");
       lcd.setCursor(0, 1);
       lcd.print(waterStable ? "STABLE      " : "LOW         ");
       break;
 
-    case 3: // TEMP
+    case 3:
       lcd.setCursor(0, 0);
       lcd.print("TEMPERATURE");
       lcd.setCursor(0, 1);
@@ -232,7 +225,7 @@ void loop() {
       }
       break;
 
-    case 4: // DO
+    case 4:
       lcd.setCursor(0, 0);
       lcd.print("DISSOLVED O2");
       lcd.setCursor(0, 1);
@@ -243,3 +236,4 @@ void loop() {
 
   delay(200);
 }
+Write to Thesis Ideas
