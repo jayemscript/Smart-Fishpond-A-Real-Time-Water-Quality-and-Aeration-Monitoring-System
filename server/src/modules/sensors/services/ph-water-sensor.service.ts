@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
+import { SensorLoggerService } from './sensor-logger.service';
 
 export interface PhWaterData {
   phLevel: number;
@@ -15,7 +16,10 @@ export class PhWaterSensorService {
   private latestESP32Data: PhWaterData | null = null;
   private broadcastingEnabled = false;
 
-  constructor(private readonly socketService: SocketService) {}
+  constructor(
+    private readonly socketService: SocketService,
+    private readonly sensorLogger: SensorLoggerService, // 👈 injected
+  ) {}
 
   startPhBroadcasting() {
     if (this.broadcastingEnabled) {
@@ -63,7 +67,12 @@ export class PhWaterSensorService {
     this.logger.log(
       `ESP32 pH level: ${data.phLevel} (${data.status}) from ${data.sensorId}`,
     );
+
+    // Broadcast to WebSocket clients
     this.socketService.broadcast('sensor:phWater', data);
+
+    // 👇 Log to DB (buffered — saves every 10 readings or 30s)
+    this.sensorLogger.logPh(data);
 
     return { status: 'received' };
   }

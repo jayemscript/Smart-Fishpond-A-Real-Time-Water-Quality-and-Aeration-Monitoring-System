@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
+import { SensorLoggerService } from './sensor-logger.service';
 
 export interface WaterLevelData {
-  level: number; // 0 or 1 from ESP32
+  level: number;
   timestamp: Date;
   sensorId: string;
   status: 'low' | 'stable';
@@ -15,7 +16,10 @@ export class WaterLevelSensorService {
   private latestESP32Data: WaterLevelData | null = null;
   private broadcastingEnabled = false;
 
-  constructor(private readonly socketService: SocketService) {}
+  constructor(
+    private readonly socketService: SocketService,
+    private readonly sensorLogger: SensorLoggerService, // 👈 injected
+  ) {}
 
   startWaterlevelBroadcasting() {
     if (this.broadcastingEnabled) {
@@ -57,7 +61,11 @@ export class WaterLevelSensorService {
       `Water Level: ${data.status.toUpperCase()} (${data.level})`,
     );
 
+    // Broadcast to WebSocket clients
     this.socketService.broadcast('sensor:water-level', data);
+
+    // 👇 Log to DB (buffered — saves every 10 readings or 30s)
+    this.sensorLogger.logWaterLevel(data);
 
     return { status: 'received' };
   }

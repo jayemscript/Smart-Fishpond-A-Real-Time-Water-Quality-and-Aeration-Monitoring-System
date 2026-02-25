@@ -19,6 +19,10 @@ import { AuditLog } from 'src/modules/audit/entities/audit-log.entity';
 import { Notifications } from 'src/modules/notifications/entities/notification.entity';
 import { Mailer } from './modules/mailer/entities/mailer.entity';
 import { SensorsModule } from './modules/sensors/sensors.module';
+import { DissolvedOxygenRecords } from 'src/modules/sensors/entities/do.entity';
+import { PhLevelRecords } from 'src/modules/sensors/entities/ph-level.entity';
+import { TemperatureRecord } from 'src/modules/sensors/entities/temperature.entity';
+import { WaterLevelRecords } from 'src/modules/sensors/entities/water-level.entity';
 
 @Module({
   imports: [
@@ -48,6 +52,10 @@ import { SensorsModule } from './modules/sensors/sensors.module';
             AuditLog,
             Notifications,
             Mailer,
+            DissolvedOxygenRecords,
+            PhLevelRecords,
+            TemperatureRecord,
+            WaterLevelRecords,
           ],
           synchronize: configService.get<string>('NODE_ENV') === 'development',
           ssl: isSSL ? { rejectUnauthorized: false } : false,
