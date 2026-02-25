@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
 
 export interface DoData {
-  value: number;
+  oxygenLevel: number;
   unit: string;
   timestamp: Date;
   sensorId: string;
@@ -54,7 +54,7 @@ export class DissolvedOxygenSensorService {
    */
   handleDissolvedOxygenESP32(payload: any) {
     const data: DoData = {
-      value: payload.data.value,
+      oxygenLevel: payload.data.oxygenLevel,
       timestamp: new Date(),
       sensorId: payload.data.sensorId,
       unit: payload.data.unit,
@@ -68,11 +68,11 @@ export class DissolvedOxygenSensorService {
       return { status: 'broadcasting stopped' };
     }
     this.logger
-      .log(`ESP32 dissolved: ${data.value}mg/L from ${data.sensorId}      
+      .log(`ESP32 dissolved: ${data.oxygenLevel}mg/L from ${data.sensorId}      
       `);
 
     //Broadcast immediately
-    this.socketService.broadcast('sensor:temperature', data);
+    this.socketService.broadcast('sensor:dissolvedOxygen', data);
 
     return { status: 'recevied' };
   }

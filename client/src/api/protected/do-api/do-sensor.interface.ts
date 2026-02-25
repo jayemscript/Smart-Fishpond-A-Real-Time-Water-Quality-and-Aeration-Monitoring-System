@@ -1,5 +1,5 @@
 export interface DoData {
-  value: number;
+  oxygenLevel: number;
   unit: string;
   timestamp: Date;
   sensorId: string;

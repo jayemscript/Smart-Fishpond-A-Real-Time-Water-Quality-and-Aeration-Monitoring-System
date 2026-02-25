@@ -70,7 +70,7 @@ export default function DOContent() {
       .reverse()
       .map((reading, index) => ({
         timestamp: formatDate.readableDateTime(reading.timestamp),
-        doLevel: Number(reading.value),
+        doLevel: Number(reading.oxygenLevel),
         index,
       }));
   }, [doHistory]);
@@ -92,7 +92,7 @@ export default function DOContent() {
       setCurrentDo(doData);
       setDoHistory((prev) => [doData, ...prev].slice(0, 20));
       setIsSimulationRunning(true);
-      setStatus(getDoStatus(doData.value));
+      setStatus(getDoStatus(doData.oxygenLevel));
     };
 
     socket.on('connect', handleConnect);
@@ -252,7 +252,7 @@ export default function DOContent() {
                   <div
                     className={`text-6xl max-sm:text-2xl font-bold ${getStatusColor()}`}
                   >
-                    {currentDo.value} {currentDo.unit}
+                    {currentDo.oxygenLevel} {currentDo.unit}
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
@@ -389,7 +389,7 @@ export default function DOContent() {
             >
               <div className="space-y-2">
                 {doHistory.map((reading, index) => {
-                  const s = getDoStatus(reading.value);
+                  const s = getDoStatus(reading.oxygenLevel);
                   return (
                     <div
                       key={index}
@@ -398,7 +398,7 @@ export default function DOContent() {
                       <div className="flex items-center gap-3">
                         <Wind className="w-4 h-4 text-muted-foreground" />
                         <span className="font-semibold max-sm:text-sm">
-                          {reading.value} {reading.unit}
+                          {reading.oxygenLevel} {reading.unit}
                         </span>
                         <Badge
                           variant={
@@ -441,7 +441,7 @@ export default function DOContent() {
             <div className="text-2xl font-bold">
               {doHistory.length > 0
                 ? (
-                    doHistory.reduce((sum, r) => sum + r.value, 0) /
+                    doHistory.reduce((sum, r) => sum + r.oxygenLevel, 0) /
                     doHistory.length
                   ).toFixed(2)
                 : '0.00'}{' '}
@@ -459,7 +459,7 @@ export default function DOContent() {
           <CardContent>
             <div className="text-2xl font-bold">
               {doHistory.length > 0
-                ? Math.max(...doHistory.map((r) => r.value)).toFixed(2)
+                ? Math.max(...doHistory.map((r) => r.oxygenLevel)).toFixed(2)
                 : '0.00'}{' '}
               <span className="text-base font-normal text-muted-foreground">
                 mg/L
@@ -475,7 +475,7 @@ export default function DOContent() {
           <CardContent>
             <div className="text-2xl font-bold">
               {doHistory.length > 0
-                ? Math.min(...doHistory.map((r) => r.value)).toFixed(2)
+                ? Math.min(...doHistory.map((r) => r.oxygenLevel)).toFixed(2)
                 : '0.00'}{' '}
               <span className="text-base font-normal text-muted-foreground">
                 mg/L

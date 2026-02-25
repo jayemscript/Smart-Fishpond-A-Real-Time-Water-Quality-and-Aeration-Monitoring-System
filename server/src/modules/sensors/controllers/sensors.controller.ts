@@ -151,7 +151,7 @@ export class SensorsController {
       case 'phWater':
         return this.phWaterSensorService.handlePhWaterESP32(payload);
 
-      case 'floatSwitch':
+      case 'floatState':
         return this.waterLevelSensorService.handleWaterLevelESP32(payload);
 
       case 'dissolvedOxygen':
