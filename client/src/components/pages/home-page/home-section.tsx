@@ -24,7 +24,7 @@ export default function HomeSection() {
             <div>
               <div className="inline-flex items-center gap-2 bg-primary/15 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 border border-primary/30">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                IoT Monitoring System
+                IoT Monitoring System Version 2
               </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
