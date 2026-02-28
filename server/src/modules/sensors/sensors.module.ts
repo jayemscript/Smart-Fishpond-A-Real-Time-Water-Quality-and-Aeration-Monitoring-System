@@ -6,7 +6,9 @@ import { TurbiditySensorService } from './services/turbidity-sensor.service';
 import { PhWaterSensorService } from './services/ph-water-sensor.service';
 import { WaterLevelSensorService } from './services/water-level-sensor.service';
 import { DissolvedOxygenSensorService } from './services/do.service';
+import { SensorLogsService } from './services/sensor-logs.service';
 import { SensorsController } from './controllers/sensors.controller';
+import { SensorLogsController } from './controllers/sensor-logs.controller';
 import { SocketModule } from '../sockets/socket.module';
 import { SensorLoggerService } from './services/sensor-logger.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -31,7 +33,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     AuthModule,
     SocketModule,
   ],
-  controllers: [SensorsController],
+  controllers: [SensorsController, SensorLogsController],
   providers: [
     TemperatureSensorService,
     TurbiditySensorService,
@@ -39,6 +41,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     WaterLevelSensorService,
     DissolvedOxygenSensorService,
     SensorLoggerService,
+    SensorLogsService,
   ],
   exports: [
     TemperatureSensorService,
@@ -47,6 +50,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     WaterLevelSensorService,
     DissolvedOxygenSensorService,
     SensorLoggerService,
+    SensorLogsService,
   ],
 })
 export class SensorsModule {}
