@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDate } from '@syntaxsentinel/date-utils';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   temperature: {
@@ -46,6 +47,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function TemperatureContent() {
+  const router = useRouter();
   const { socket } = useContext(SocketContext);
   const [currentTemp, setCurrentTemp] = useState<TemperatureData | null>(null);
   const [tempHistory, setTempHistory] = useState<TemperatureData[]>([]);
@@ -198,6 +200,9 @@ export default function TemperatureContent() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button onClick={() => router.push('/temperature-monitoring/logs')}>
+            View Logs
+          </Button>
           <Badge
             variant={isConnected ? 'default' : 'destructive'}
             className="h-8"
