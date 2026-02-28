@@ -17,7 +17,7 @@ import { SessionGuard } from 'src/guards/session.guard';
 import { SensorLogsService } from '../services/sensor-logs.service';
 
 @UseGuards(JwtAuthGuard, SessionGuard)
-@Controller('sensor_logs')
+@Controller('sensor-logs')
 export class SensorLogsController {
   constructor(private readonly sensorLogsService: SensorLogsService) {}
 
