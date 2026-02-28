@@ -123,7 +123,7 @@ export default function AdminLayout({
   }));
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-background rounded-3xl">
       <TabsComponent
         items={tabItems}
         value={currentTab}

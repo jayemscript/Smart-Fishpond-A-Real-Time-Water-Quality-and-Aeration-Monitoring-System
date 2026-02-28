@@ -35,9 +35,9 @@ const LoginPageContent = async () => {
           {/* Logo and header */}
           <div className="flex items-center gap-4">
             <img
-              src="/images/hrm-logo.png"
+              src="/images/background-2.jpg"
               alt="smart pond Logo"
-              className="w-16 h-16 rounded-lg border-2 border-white/40 shadow-md"
+              className="w-16 h-12 rounded-lg border-2 border-white/40 shadow-md"
             />
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white drop-shadow-sm">

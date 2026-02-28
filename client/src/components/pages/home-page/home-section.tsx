@@ -9,7 +9,7 @@ export default function HomeSection() {
     // <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
     <div
       style={{
-        backgroundImage: "url('/images/background-2.jpg')",
+        backgroundImage: "url('/images/background.jpg')",
       }}
       className="min-h-screen  text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-no-repeat bg-center bg-cover"
     >
@@ -17,15 +17,9 @@ export default function HomeSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Side */}
           <div className="space-y-8">
-            <div className="flex justify-end">
-              <ThemeButtons />
-            </div>
+
 
             <div>
-              <div className="inline-flex items-center gap-2 bg-primary/15 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 border border-primary/30">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                IoT Monitoring System
-              </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Pond Watch
