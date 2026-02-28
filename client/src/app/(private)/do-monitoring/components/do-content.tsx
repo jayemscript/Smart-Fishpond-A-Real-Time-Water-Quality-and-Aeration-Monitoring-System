@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDate } from '@syntaxsentinel/date-utils';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   doLevel: {
@@ -56,6 +57,7 @@ function getDoStatus(value: number): 'low' | 'normal' | 'high' {
 }
 
 export default function DOContent() {
+  const router = useRouter();
   const { socket } = useContext(SocketContext);
   const [currentDo, setCurrentDo] = useState<DoData | null>(null);
   const [doHistory, setDoHistory] = useState<DoData[]>([]);
@@ -196,6 +198,10 @@ export default function DOContent() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button onClick={() => router.push('/do-monitoring/logs')}>
+            View Logs
+          </Button>
+
           <Badge
             variant={isConnected ? 'default' : 'destructive'}
             className="h-8"
