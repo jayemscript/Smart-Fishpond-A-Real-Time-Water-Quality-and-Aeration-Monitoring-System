@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 import React from 'react';
 
-export default function PhLogs() {
+export default function TempLogs() {
   return (
     <div className="bg-background rounded-4xl">
       <TempTable />

@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDate } from '@syntaxsentinel/date-utils';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   waterLevel: {
@@ -49,6 +50,7 @@ function getWaterStatus(level: number): 'low' | 'stable' {
 }
 
 export default function WaterLevelContent() {
+  const router = useRouter();
   const { socket } = useContext(SocketContext);
 
   const [currentLevel, setCurrentLevel] = useState<WaterLevelData | null>(null);
@@ -165,6 +167,9 @@ export default function WaterLevelContent() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button onClick={() => router.push('/water-level-monitoring/logs')}>
+            View Logs
+          </Button>
           <Badge variant={isConnected ? 'default' : 'destructive'}>
             <Activity className="w-3 h-3 mr-1" />
             {isConnected ? 'Connected' : 'Disconnected'}
