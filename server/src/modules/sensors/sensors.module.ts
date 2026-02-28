@@ -7,6 +7,7 @@ import { PhWaterSensorService } from './services/ph-water-sensor.service';
 import { WaterLevelSensorService } from './services/water-level-sensor.service';
 import { DissolvedOxygenSensorService } from './services/do.service';
 import { SensorLogsService } from './services/sensor-logs.service';
+import { SensorAnalyticsService } from './services/sensor-analytics.service';
 import { SensorsController } from './controllers/sensors.controller';
 import { SensorLogsController } from './controllers/sensor-logs.controller';
 import { SocketModule } from '../sockets/socket.module';
@@ -42,6 +43,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     DissolvedOxygenSensorService,
     SensorLoggerService,
     SensorLogsService,
+    SensorAnalyticsService,
   ],
   exports: [
     TemperatureSensorService,
@@ -51,6 +53,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     DissolvedOxygenSensorService,
     SensorLoggerService,
     SensorLogsService,
+    SensorAnalyticsService,
   ],
 })
 export class SensorsModule {}

@@ -5,7 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { formatDate } from '@syntaxsentinel/date-utils';
 import { extractErrorMessage } from '@/configs/api.helper';
 import { showToastError, showToastSuccess } from '@/utils/toast-config';
-import { GetAllPaginatedWaterLevel } from '@/api/protected/sensor-logs/sensor.api';
+import { GetAllPaginatedWaterLevel } from '@/api/protected/sensor-logs/sensor-logs.api';
 import { WaterLevelData } from '@/api/protected/sensor-logs/sensor-interface.api';
 import { RiWaterFlashFill, RiWaterFlashLine } from 'react-icons/ri';
 

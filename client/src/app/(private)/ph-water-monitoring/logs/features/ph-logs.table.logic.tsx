@@ -5,7 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { formatDate } from '@syntaxsentinel/date-utils';
 import { extractErrorMessage } from '@/configs/api.helper';
 import { showToastError, showToastSuccess } from '@/utils/toast-config';
-import { GetAllPaginatedPh } from '@/api/protected/sensor-logs/sensor.api';
+import { GetAllPaginatedPh } from '@/api/protected/sensor-logs/sensor-logs.api';
 import { PhData } from '@/api/protected/sensor-logs/sensor-interface.api';
 
 import {
