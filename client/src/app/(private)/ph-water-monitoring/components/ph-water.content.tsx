@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatDate } from '@syntaxsentinel/date-utils';
+import { useRouter } from 'next/navigation';
 
 const chartConfig = {
   phLevel: {
@@ -46,6 +47,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function PHWaterContent() {
+  const router = useRouter();
   const { socket } = useContext(SocketContext);
   const [currentPh, setCurrentPh] = useState<PhWaterData | null>(null);
   const [phHistory, setPhHistory] = useState<PhWaterData[]>([]);
@@ -200,6 +202,9 @@ export default function PHWaterContent() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button onClick={() => router.push('/ph-water-monitoring/logs')}>
+            View Logs
+          </Button>
           <Badge
             variant={isConnected ? 'default' : 'destructive'}
             className="h-8"
@@ -418,8 +423,8 @@ export default function PHWaterContent() {
                           reading.phLevel < 6.5
                             ? 'secondary'
                             : reading.phLevel > 8.5
-                            ? 'destructive'
-                            : 'default'
+                              ? 'destructive'
+                              : 'default'
                         }
                         className="text-xs"
                       >
