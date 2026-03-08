@@ -53,12 +53,12 @@ export const ALERT_CONFIG: Record<
   },
   dissolvedOxygen: {
     windowMs: 1 * 60 * 1000,
-    minAbnormal: 10,
+    minAbnormal: 15,
     cooldownMs: 10 * 60 * 1000,
   },
   waterLevel: {
     windowMs: 1 * 60 * 1000, // 5 minutes
-    minAbnormal: 5, // 5 low readings in window
+    minAbnormal: 15, // 5 low readings in window
     cooldownMs: 10 * 60 * 1000,
   },
 };

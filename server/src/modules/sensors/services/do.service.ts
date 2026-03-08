@@ -54,6 +54,7 @@ export class DissolvedOxygenSensorService {
     };
 
     this.latestESP32Data = data;
+    this.sensorAlert.evaluateDissolvedOxygen(data);
 
     if (!this.broadcastingEnabled) {
       this.logger.debug('Received ESP32 data but broadcasting stopped');
@@ -68,8 +69,6 @@ export class DissolvedOxygenSensorService {
     this.socketService.broadcast('sensor:dissolvedOxygen', data);
 
     this.sensorLogger.logDo(data);
-
-    this.sensorAlert.evaluateDissolvedOxygen(data);
 
     return { status: 'received' };
   }

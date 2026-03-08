@@ -60,6 +60,7 @@ export class PhWaterSensorService {
     };
 
     this.latestESP32Data = data;
+    this.sensorAlert.evaluatePhWater(data);
 
     if (!this.broadcastingEnabled) {
       this.logger.debug('Received ESP32 pH data but broadcasting stopped');
@@ -74,7 +75,6 @@ export class PhWaterSensorService {
     this.socketService.broadcast('sensor:phWater', data);
 
     this.sensorLogger.logPh(data);
-    this.sensorAlert.evaluatePhWater(data);
 
     return { status: 'received' };
   }

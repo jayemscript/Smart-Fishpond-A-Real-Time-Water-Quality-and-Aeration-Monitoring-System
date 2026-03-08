@@ -54,6 +54,7 @@ export class WaterLevelSensorService {
     };
 
     this.latestESP32Data = data;
+    this.sensorAlert.evaluateWaterLevel(data);
 
     if (!this.broadcastingEnabled) {
       return { status: 'broadcasting stopped' };
@@ -67,7 +68,6 @@ export class WaterLevelSensorService {
     this.socketService.broadcast('sensor:water-level', data);
 
     this.sensorLogger.logWaterLevel(data);
-    this.sensorAlert.evaluateWaterLevel(data);
 
     return { status: 'received' };
   }
