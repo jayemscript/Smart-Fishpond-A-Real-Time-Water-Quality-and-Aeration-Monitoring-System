@@ -44,22 +44,22 @@ export const ALERT_CONFIG: Record<
   temperature: {
     windowMs: 1 * 60 * 1000, // 10 minutes
     minAbnormal: 15, // 15 bad readings in window
-    cooldownMs: 1 * 60 * 1000, // 30 min cooldown
+    cooldownMs: 10 * 60 * 1000, // 30 min cooldown
   },
   phWater: {
     windowMs: 1 * 60 * 1000,
     minAbnormal: 15,
-    cooldownMs: 1 * 60 * 1000,
+    cooldownMs: 10 * 60 * 1000,
   },
   dissolvedOxygen: {
     windowMs: 1 * 60 * 1000,
     minAbnormal: 10,
-    cooldownMs: 1 * 60 * 1000,
+    cooldownMs: 10 * 60 * 1000,
   },
   waterLevel: {
     windowMs: 1 * 60 * 1000, // 5 minutes
     minAbnormal: 5, // 5 low readings in window
-    cooldownMs: 1 * 60 * 1000,
+    cooldownMs: 10 * 60 * 1000,
   },
 };
 
