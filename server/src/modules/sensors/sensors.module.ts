@@ -12,6 +12,7 @@ import { SensorsController } from './controllers/sensors.controller';
 import { SensorLogsController } from './controllers/sensor-logs.controller';
 import { SocketModule } from '../sockets/socket.module';
 import { SensorLoggerService } from './services/sensor-logger.service';
+import { SensorAlertService } from './services/sensor-alert.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from 'src/shared.module';
 import { AuthModule } from 'src/modules/auth/auth.module';
@@ -20,6 +21,7 @@ import { DissolvedOxygenRecords } from './entities/do.entity';
 import { TemperatureRecord } from './entities/temperature.entity';
 import { WaterLevelRecords } from './entities/water-level.entity';
 import { PhLevelRecords } from './entities/ph-level.entity';
+import { MailerModule } from 'src/modules/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     SharedModule,
     AuthModule,
     SocketModule,
+    MailerModule,
   ],
   controllers: [SensorsController, SensorLogsController],
   providers: [
@@ -44,6 +47,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     SensorLoggerService,
     SensorLogsService,
     SensorAnalyticsService,
+    SensorAlertService,
   ],
   exports: [
     TemperatureSensorService,
@@ -54,6 +58,7 @@ import { PhLevelRecords } from './entities/ph-level.entity';
     SensorLoggerService,
     SensorLogsService,
     SensorAnalyticsService,
+    SensorAlertService,
   ],
 })
 export class SensorsModule {}

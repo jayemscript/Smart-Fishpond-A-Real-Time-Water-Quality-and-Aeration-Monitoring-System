@@ -50,10 +50,11 @@ export class TemperatureSensorService {
       temperature: payload.data.temperature,
       timestamp: new Date(),
       sensorId: payload.data.sensorId,
-      unit: payload.data.unit,
+      unit: payload.data.unit ?? '°C',
     };
 
     this.latestESP32Data = data;
+    this.sensorAlert.evaluateTemperature(data);
 
     if (!this.broadcastingEnabled) {
       this.logger.debug('Received ESP32 data but broadcasting is stopped');
@@ -69,7 +70,6 @@ export class TemperatureSensorService {
 
     this.sensorLogger.logTemperature(data);
 
-    this.sensorAlert.evaluateTemperature(data);
     return { status: 'received' };
   }
 

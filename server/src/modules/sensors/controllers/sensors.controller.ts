@@ -131,6 +131,22 @@ export class SensorsController {
     return this.doService.startDoBroadcasting();
   }
 
+  @Get('test-alert')
+  async testAlert() {
+    const now = new Date();
+
+    for (let i = 0; i < 5; i++) {
+      this.sensorAlertService.evaluateTemperature({
+        temperature: 99, // abnormal (> 35)
+        timestamp: now,
+        sensorId: 'test-001',
+        unit: 'C',
+      });
+    }
+
+    return { message: 'Test alert triggered' };
+  }
+
   // new
   // // POST /sensors/temperature/data
   // @Post('temperature/data')

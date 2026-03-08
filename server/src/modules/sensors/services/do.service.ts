@@ -50,7 +50,7 @@ export class DissolvedOxygenSensorService {
       oxygenLevel: payload.data.oxygenLevel,
       timestamp: new Date(),
       sensorId: payload.data.sensorId,
-      unit: payload.data.unit,
+      unit: payload.data.unit ?? 'mg/L',
     };
 
     this.latestESP32Data = data;
@@ -66,7 +66,6 @@ export class DissolvedOxygenSensorService {
 
     // Broadcast to WebSocket clients
     this.socketService.broadcast('sensor:dissolvedOxygen', data);
-
 
     this.sensorLogger.logDo(data);
 

@@ -1,11 +1,15 @@
 // src/modules/sensors/services/sensor-alert.service.ts
 
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Like } from 'typeorm';
 import { MailerService } from 'src/modules/mailer/mailer.service';
 import { TemperatureData } from './temperature-sensor.service';
 import { PhWaterData } from './ph-water-sensor.service';
 import { DoData } from './do.service';
 import { WaterLevelData } from './water-level-sensor.service';
+import { User } from 'src/modules/users/entities/user.entity';
+import moment from 'moment';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,32 +38,27 @@ export const ALERT_CONFIG: Record<
     windowMs: number; // sliding window duration
     minAbnormal: number; // min bad readings to trigger alert
     cooldownMs: number; // silence period after alert fires
-    recipient: string; // email recipient
   }
 > = {
   temperature: {
-    windowMs: 10 * 60 * 1000, // 10 minutes
+    windowMs: 1 * 60 * 1000, // 10 minutes
     minAbnormal: 15, // 15 bad readings in window
-    cooldownMs: 30 * 60 * 1000, // 30 min cooldown
-    recipient: process.env.ALERT_EMAIL_RECIPIENT ?? 'admin@example.com',
+    cooldownMs: 1 * 60 * 1000, // 30 min cooldown
   },
   phWater: {
-    windowMs: 10 * 60 * 1000,
-    minAbnormal: 10,
-    cooldownMs: 30 * 60 * 1000,
-    recipient: process.env.ALERT_EMAIL_RECIPIENT ?? 'admin@example.com',
+    windowMs: 1 * 60 * 1000,
+    minAbnormal: 15,
+    cooldownMs: 1 * 60 * 1000,
   },
   dissolvedOxygen: {
-    windowMs: 10 * 60 * 1000,
+    windowMs: 1 * 60 * 1000,
     minAbnormal: 10,
-    cooldownMs: 30 * 60 * 1000,
-    recipient: process.env.ALERT_EMAIL_RECIPIENT ?? 'admin@example.com',
+    cooldownMs: 1 * 60 * 1000,
   },
   waterLevel: {
-    windowMs: 5 * 60 * 1000, // 5 minutes
+    windowMs: 1 * 60 * 1000, // 5 minutes
     minAbnormal: 5, // 5 low readings in window
-    cooldownMs: 30 * 60 * 1000,
-    recipient: process.env.ALERT_EMAIL_RECIPIENT ?? 'admin@example.com',
+    cooldownMs: 1 * 60 * 1000,
   },
 };
 
@@ -77,13 +76,17 @@ export class SensorAlertService {
     waterLevel: { readings: [], lastAlertSentAt: null },
   };
 
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
   // ─── Public evaluation methods (called from each sensor service) ───────────
 
   evaluateTemperature(data: TemperatureData): void {
-    // Normal range: 10°C – 35°C
-    const isAbnormal = data.temperature > 35 || data.temperature < 10;
+    // Normal range: 25°C – 35°C
+    const isAbnormal = data.temperature > 35 || data.temperature < 25;
     this.evaluate(
       'temperature',
       {
@@ -158,6 +161,9 @@ export class SensorAlertService {
 
     // 3. Count abnormal readings
     const abnormalCount = window.readings.filter((r) => r.isAbnormal).length;
+    console.log(
+      `[${sensorType}] abnormal=${abnormalCount} / need=${config.minAbnormal} | isAbnormal=${reading.isAbnormal} | value=${reading.value}`,
+    );
 
     this.logger.debug(
       `[${sensorType}] Window: ${window.readings.length} readings, ${abnormalCount} abnormal`,
@@ -198,6 +204,23 @@ export class SensorAlertService {
     const sensorLabel = this.getSensorLabel(sensorType);
     const details = this.buildAlertDetails(sensorType, latestData);
 
+    // ─── Fetch all Gmail users from the database ───────────────────────────
+    const gmailUsers = await this.userRepository.find({
+      where: { email: Like('%@gmail.com') },
+      select: ['email'],
+    });
+
+    if (gmailUsers.length === 0) {
+      this.logger.warn(
+        `[${sensorType}] No Gmail users found — alert email skipped`,
+      );
+      return;
+    }
+
+    this.logger.warn(
+      `🚨 ALERT triggered for [${sensorType}]: ${abnormalCount}/${windowSize} abnormal readings`,
+    );
+
     const subject = `🚨 [ALERT] ${sensorLabel} Abnormal Reading Detected`;
 
     const body = `
@@ -222,7 +245,7 @@ export class SensorAlertService {
               ${details}
               <tr>
                 <td style="padding: 8px 12px; border: 1px solid #fca5a5;">Alert Time</td>
-                <td style="padding: 8px 12px; border: 1px solid #fca5a5;">${new Date().toISOString()}</td>
+                <td style="padding: 8px 12px; border: 1px solid #fca5a5;">${moment().utcOffset('+08:00').format('MMMM D, YYYY h:mm:ss A')} (PHT)</td>
               </tr>
               <tr>
                 <td style="padding: 8px 12px; border: 1px solid #fca5a5;">Abnormal Readings</td>
@@ -241,18 +264,26 @@ export class SensorAlertService {
       </div>
     `;
 
-    this.logger.warn(
-      `🚨 ALERT triggered for [${sensorType}]: ${abnormalCount}/${windowSize} abnormal readings`,
+    // ─── Send to all Gmail users in parallel ──────────────────────────────
+    await Promise.all(
+      gmailUsers.map((user) =>
+        this.mailerService
+          .sendEmail({ recipient: user.email, subject, body })
+          .then(() =>
+            this.logger.log(
+              `Alert email sent for [${sensorType}] to ${user.email}`,
+            ),
+          )
+          .catch((err) =>
+            this.logger.error(
+              `Failed to send alert to ${user.email}: ${err.message}`,
+            ),
+          ),
+      ),
     );
 
-    await this.mailerService.sendEmail({
-      recipient: config.recipient,
-      subject,
-      body,
-    });
-
     this.logger.log(
-      `Alert email sent for [${sensorType}] to ${config.recipient}`,
+      `Alert broadcast complete for [${sensorType}] — sent to ${gmailUsers.length} user(s)`,
     );
   }
 
