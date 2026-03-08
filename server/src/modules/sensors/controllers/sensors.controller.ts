@@ -19,6 +19,10 @@ import { WaterLevelSensorService } from '../services/water-level-sensor.service'
 import { DissolvedOxygenSensorService } from '../services/do.service';
 import { CreateSensorDto } from '../dto/create-sensor.dto';
 import { UpdateSensorDto } from '../dto/update-sensor.dto';
+import {
+  SensorAlertService,
+  SensorType,
+} from '../services/sensor-alert.service';
 
 @Controller('sensors')
 export class SensorsController {
@@ -28,6 +32,7 @@ export class SensorsController {
     private readonly turbiditySensorService: TurbiditySensorService,
     private readonly phWaterSensorService: PhWaterSensorService,
     private readonly doService: DissolvedOxygenSensorService,
+    private readonly sensorAlertService: SensorAlertService,
   ) {}
 
   /**
@@ -160,5 +165,51 @@ export class SensorsController {
       default:
         return { status: 'error', message: 'Unknown sensor type' };
     }
+  }
+
+  // ─── Alert Report endpoints ────────────────────────────────────────────────
+
+  /**
+   * GET /sensors/alerts/report
+   * Returns a full JSON report for all sensors — use this on the client side to generate PDFs.
+   *
+   * Response shape: FullAlertReportJson
+   * {
+   *   reportTitle: string,
+   *   generatedAt: string (ISO),
+   *   sensors: AlertReportJson[]   ← one entry per sensor type
+   * }
+   */
+  @Get('alerts/report')
+  getFullAlertReport() {
+    return this.sensorAlertService.generateFullReport();
+  }
+
+  /**
+   * GET /sensors/alerts/report/:sensorType
+   * Returns a JSON report for a single sensor.
+   * :sensorType = temperature | phWater | dissolvedOxygen | waterLevel
+   *
+   * Response shape: AlertReportJson
+   */
+  @Get('alerts/report/:sensorType')
+  getSensorAlertReport(@Param('sensorType') sensorType: string) {
+    const valid: SensorType[] = [
+      'temperature',
+      'phWater',
+      'dissolvedOxygen',
+      'waterLevel',
+    ];
+
+    if (!valid.includes(sensorType as SensorType)) {
+      return {
+        status: 'error',
+        message: `Unknown sensorType. Valid values: ${valid.join(', ')}`,
+      };
+    }
+
+    return this.sensorAlertService.generateAlertReport(
+      sensorType as SensorType,
+    );
   }
 }

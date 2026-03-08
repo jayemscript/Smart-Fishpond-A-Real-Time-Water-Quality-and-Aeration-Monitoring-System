@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
 import { SensorLoggerService } from './sensor-logger.service';
+import { SensorAlertService } from './sensor-alert.service';
 
 export interface TemperatureData {
   temperature: number;
@@ -18,7 +19,8 @@ export class TemperatureSensorService {
 
   constructor(
     private readonly socketService: SocketService,
-    private readonly sensorLogger: SensorLoggerService, // 👈 injected
+    private readonly sensorLogger: SensorLoggerService,
+    private readonly sensorAlert: SensorAlertService,
   ) {}
 
   startTemperatureBroadcasting() {
@@ -65,9 +67,9 @@ export class TemperatureSensorService {
     // Broadcast to WebSocket clients
     this.socketService.broadcast('sensor:temperature', data);
 
-    // 👇 Log to DB (buffered — saves every 10 readings or 30s)
     this.sensorLogger.logTemperature(data);
 
+    this.sensorAlert.evaluateTemperature(data);
     return { status: 'received' };
   }
 

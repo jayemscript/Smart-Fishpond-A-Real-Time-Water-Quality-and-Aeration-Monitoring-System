@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SocketService } from 'src/modules/sockets/socket.service';
 import { SensorLoggerService } from './sensor-logger.service';
+import { SensorAlertService } from './sensor-alert.service';
 
 export interface PhWaterData {
   phLevel: number;
@@ -18,7 +19,8 @@ export class PhWaterSensorService {
 
   constructor(
     private readonly socketService: SocketService,
-    private readonly sensorLogger: SensorLoggerService, // 👈 injected
+    private readonly sensorLogger: SensorLoggerService,
+    private readonly sensorAlert: SensorAlertService,
   ) {}
 
   startPhBroadcasting() {
@@ -71,8 +73,8 @@ export class PhWaterSensorService {
     // Broadcast to WebSocket clients
     this.socketService.broadcast('sensor:phWater', data);
 
-    // 👇 Log to DB (buffered — saves every 10 readings or 30s)
     this.sensorLogger.logPh(data);
+    this.sensorAlert.evaluatePhWater(data);
 
     return { status: 'received' };
   }
