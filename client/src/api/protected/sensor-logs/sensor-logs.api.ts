@@ -247,3 +247,7 @@ export async function GetAlertSummary(
     axios.get('/sensor-logs/analytics/alerts', { params: { range } }),
   );
 }
+
+export async function getSensorAlertReport(): Promise<any> {
+  return handleRequest(axios.get('/sensors/alerts/report'));
+}

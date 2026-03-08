@@ -35,6 +35,7 @@ import {
   StatusDistributionResponse,
   AlertSummaryResponse,
 } from '@/api/protected/sensor-logs/sensor-interface.api';
+import AlertAnalyticsPage from './alert-analytics-page'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -562,6 +563,7 @@ export default function DashboardPageContent() {
 
   return (
     <div className="min-h-screen p-6">
+
       {/* ── Header ── */}
       <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -582,6 +584,7 @@ export default function DashboardPageContent() {
           <ErrorBanner message={overviewError} />
         </div>
       )}
+      <AlertAnalyticsPage />
 
       {/* ── Stat Cards ── */}
       <div className="mb-2">
