@@ -40,52 +40,52 @@ export const ALERT_CONFIG: Record<
     cooldownMs: number; // silence period after alert fires
   }
   // testing
-  // > = {
-  //   temperature: {
-  //     windowMs: 1 * 60 * 1000, // 10 minutes
-  //     minAbnormal: 15, // 15 bad readings in window
-  //     cooldownMs: 1 * 60 * 1000, // 30 min cooldown
-  //   },
-  //   phWater: {
-  //     windowMs: 1 * 60 * 1000,
-  //     minAbnormal: 15,
-  //     cooldownMs: 1 * 60 * 1000,
-  //   },
-  //   dissolvedOxygen: {
-  //     windowMs: 1 * 60 * 1000,
-  //     minAbnormal: 10,
-  //     cooldownMs: 1 * 60 * 1000,
-  //   },
-  //   waterLevel: {
-  //     windowMs: 1 * 60 * 1000, // 5 minutes
-  //     minAbnormal: 5, // 5 low readings in window
-  //     cooldownMs: 1 * 60 * 1000,
-  //   },
-  // };
-
-  //original
 > = {
   temperature: {
-    windowMs: 10 * 60 * 1000, // 10 minutes
+    windowMs: 1 * 60 * 1000, // 10 minutes
     minAbnormal: 15, // 15 bad readings in window
-    cooldownMs: 30 * 60 * 1000, // 30 min cooldown
+    cooldownMs: 1 * 60 * 1000, // 30 min cooldown
   },
   phWater: {
-    windowMs: 10 * 60 * 1000,
+    windowMs: 1 * 60 * 1000,
     minAbnormal: 15,
     cooldownMs: 1 * 60 * 1000,
   },
   dissolvedOxygen: {
-    windowMs: 10 * 60 * 1000,
+    windowMs: 1 * 60 * 1000,
     minAbnormal: 10,
     cooldownMs: 1 * 60 * 1000,
   },
   waterLevel: {
-    windowMs: 10 * 60 * 1000, // 5 minutes
+    windowMs: 1 * 60 * 1000, // 5 minutes
     minAbnormal: 5, // 5 low readings in window
-    cooldownMs: 30 * 60 * 1000,
+    cooldownMs: 1 * 60 * 1000,
   },
 };
+
+//original
+// > = {
+//   temperature: {
+//     windowMs: 10 * 60 * 1000, // 10 minutes
+//     minAbnormal: 15, // 15 bad readings in window
+//     cooldownMs: 30 * 60 * 1000, // 30 min cooldown
+//   },
+//   phWater: {
+//     windowMs: 10 * 60 * 1000,
+//     minAbnormal: 15,
+//     cooldownMs: 1 * 60 * 1000,
+//   },
+//   dissolvedOxygen: {
+//     windowMs: 10 * 60 * 1000,
+//     minAbnormal: 10,
+//     cooldownMs: 1 * 60 * 1000,
+//   },
+//   waterLevel: {
+//     windowMs: 10 * 60 * 1000, // 5 minutes
+//     minAbnormal: 5, // 5 low readings in window
+//     cooldownMs: 30 * 60 * 1000,
+//   },
+// };
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 

@@ -83,290 +83,400 @@ async function generatePDF(report: FullAlertReportJson) {
 
   const pageW = 210;
   const pageH = 297;
-  const marginL = 20;
-  const marginR = 20;
-  const contentW = pageW - marginL - marginR;
+  const mL = 22; // left margin
+  const mR = 22; // right margin
+  const cW = pageW - mL - mR; // content width = 166mm
   let y = 0;
 
-  const colors = {
-    primary: [30, 58, 138] as [number, number, number],      // dark blue
-    secondary: [71, 85, 105] as [number, number, number],    // slate
-    accent: [220, 38, 38] as [number, number, number],       // red
-    success: [22, 163, 74] as [number, number, number],      // green
-    warning: [234, 88, 12] as [number, number, number],      // orange
-    light: [248, 250, 252] as [number, number, number],      // near white
-    border: [226, 232, 240] as [number, number, number],     // slate-200
-    text: [15, 23, 42] as [number, number, number],          // almost black
-    muted: [100, 116, 139] as [number, number, number],      // slate-500
+  // ── Monochrome academic palette ──
+  const C = {
+    black: [10, 10, 10] as [number, number, number],
+    dark: [40, 40, 40] as [number, number, number],
+    mid: [90, 90, 90] as [number, number, number],
+    light: [160, 160, 160] as [number, number, number],
+    rule: [180, 180, 180] as [number, number, number],
+    bg: [245, 245, 245] as [number, number, number],
     white: [255, 255, 255] as [number, number, number],
-    headerBg: [15, 23, 42] as [number, number, number],      // dark navy
-    alertRed: [254, 242, 242] as [number, number, number],   // red-50
+    alert: [60, 60, 60] as [number, number, number], // dark grey for alert (no red)
   };
 
-  function checkPageBreak(neededHeight: number) {
-    if (y + neededHeight > pageH - 20) {
+  const hRule = () => {
+    doc.setDrawColor(...C.rule);
+    doc.setLineWidth(0.25);
+    doc.line(mL, y, pageW - mR, y);
+  };
+
+  const thickRule = () => {
+    doc.setDrawColor(...C.black);
+    doc.setLineWidth(0.6);
+    doc.line(mL, y, pageW - mR, y);
+  };
+
+  function needsPage(h: number) {
+    if (y + h > pageH - 18) {
       doc.addPage();
-      y = 20;
+      y = 22;
     }
   }
 
-  // ── Cover Header ──
-  doc.setFillColor(...colors.headerBg);
-  doc.rect(0, 0, pageW, 52, 'F');
+  // ══════════════════════════════════════════════════
+  // PAGE HEADER (repeated per page via footer loop)
+  // ══════════════════════════════════════════════════
 
-  // Decorative stripe
-  doc.setFillColor(...colors.accent);
-  doc.rect(0, 48, pageW, 4, 'F');
-
-  doc.setTextColor(...colors.white);
+  // ── Title block ──
+  y = 18;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('PONDWATCH', marginL, 20);
+  doc.setFontSize(7);
+  doc.setTextColor(...C.mid);
+  doc.text('PONDWATCH MONITORING SYSTEM', mL, y);
+  doc.text('SENSOR ALERT ANALYTICS REPORT', pageW - mR, y, { align: 'right' });
+
+  y += 3;
+  thickRule();
+  y += 1;
+
+  doc.setFillColor(...C.black);
+  doc.rect(mL, y, cW, 0.5, 'F');
+  y += 5;
+
+  // Report title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(...C.black);
+  doc.text('Sensor Alert Report', mL, y);
+  y += 5;
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  doc.setTextColor(148, 163, 184);
-  doc.text('Sensor Alert Analytics Report', marginL, 29);
-
-  doc.setFontSize(9);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Generated: ${formatPHT(report.generatedAt)} (PHT)`, marginL, 38);
-  doc.text(`Total Sensors Monitored: ${report.sensors.length}`, marginL, 44);
-
-  // Right side — alert triggered count
-  const triggeredCount = report.sensors.filter((s) => s.alertTriggered).length;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(28);
-  doc.setTextColor(...(triggeredCount > 0 ? colors.accent : colors.success));
-  doc.text(String(triggeredCount), pageW - marginR - 8, 28, { align: 'right' });
   doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184);
-  doc.setFont('helvetica', 'normal');
-  doc.text('ACTIVE ALERTS', pageW - marginR - 8, 35, { align: 'right' });
+  doc.setTextColor(...C.mid);
+  doc.text(`Report ID: RPT-${Date.now().toString(36).toUpperCase()}`, mL, y);
+  doc.text(`Generated: ${formatPHT(report.generatedAt)} (PHT)`, pageW - mR, y, {
+    align: 'right',
+  });
+  y += 6;
 
-  y = 62;
+  hRule();
+  y += 8;
 
-  // ── Executive Summary ──
-  doc.setFillColor(...colors.light);
-  doc.roundedRect(marginL, y, contentW, 28, 2, 2, 'F');
-  doc.setDrawColor(...colors.border);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(marginL, y, contentW, 28, 2, 2, 'S');
+  // ══════════════════════════════════════════════════
+  // SECTION 1 — Report Metadata table
+  // ══════════════════════════════════════════════════
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(...colors.primary);
-  doc.text('EXECUTIVE SUMMARY', marginL + 6, y + 8);
+  doc.setFontSize(7.5);
+  doc.setTextColor(...C.mid);
+  doc.text('1.  REPORT METADATA', mL, y);
+  y += 4;
+  hRule();
+  y += 5;
 
-  const colW = contentW / 4;
-  const summaryItems = [
-    { label: 'Sensors Monitored', value: String(report.sensors.length) },
-    {
-      label: 'Alerts Triggered',
-      value: String(triggeredCount),
-      highlight: triggeredCount > 0,
-    },
-    {
-      label: 'Total Abnormal Readings',
-      value: String(
-        report.sensors.reduce((a, s) => a + s.abnormalReadingsInWindow, 0),
-      ),
-    },
-    {
-      label: 'Total Readings',
-      value: String(
-        report.sensors.reduce((a, s) => a + s.totalReadingsInWindow, 0),
-      ),
-    },
+  const triggeredCount = report.sensors.filter((s) => s.alertTriggered).length;
+  const totalAbnormal = report.sensors.reduce(
+    (a, s) => a + s.abnormalReadingsInWindow,
+    0,
+  );
+  const totalReadings = report.sensors.reduce(
+    (a, s) => a + s.totalReadingsInWindow,
+    0,
+  );
+
+  const metaRows = [
+    ['Report Title', report.reportTitle],
+    ['Generated At', `${formatPHT(report.generatedAt)} (Philippine Time)`],
+    ['Sensors Monitored', String(report.sensors.length)],
+    [
+      'Alerts Triggered',
+      `${triggeredCount} of ${report.sensors.length} sensors`,
+    ],
+    ['Total Readings (all windows)', String(totalReadings)],
+    ['Total Abnormal Readings', String(totalAbnormal)],
   ];
 
-  summaryItems.forEach((item, i) => {
-    const x = marginL + 6 + i * colW;
+  const col1W = 60;
+  metaRows.forEach(([label, value], i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(...C.bg);
+      doc.rect(mL, y - 3.5, cW, 6, 'F');
+    }
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.setTextColor(
-      ...(item.highlight ? colors.accent : colors.primary),
-    );
-    doc.text(item.value, x, y + 20);
+    doc.setFontSize(8);
+    doc.setTextColor(...C.dark);
+    doc.text(label, mL + 2, y);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(...colors.muted);
-    doc.text(item.label, x, y + 25);
+    doc.setTextColor(...C.black);
+    doc.text(value, mL + col1W, y);
+    y += 6;
   });
 
-  y += 36;
-
-  // ── Section Title ──
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...colors.primary);
-  doc.text('SENSOR-BY-SENSOR BREAKDOWN', marginL, y);
-  doc.setDrawColor(...colors.primary);
-  doc.setLineWidth(0.5);
-  doc.line(marginL, y + 2, marginL + 68, y + 2);
+  y += 4;
+  hRule();
   y += 10;
 
-  // ── Per-Sensor Cards ──
-  for (const sensor of report.sensors) {
-    checkPageBreak(60);
+  // ══════════════════════════════════════════════════
+  // SECTION 2 — Summary table
+  // ══════════════════════════════════════════════════
 
-    const cardH = sensor.readings.length > 0 ? 72 + Math.min(sensor.readings.length, 5) * 7 : 64;
-    checkPageBreak(cardH);
+  needsPage(40);
 
-    // Card background
-    doc.setFillColor(...colors.white);
-    doc.setDrawColor(...colors.border);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(marginL, y, contentW, cardH, 2, 2, 'FD');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...C.mid);
+  doc.text('2.  ALERT SUMMARY TABLE', mL, y);
+  y += 4;
+  hRule();
+  y += 5;
 
-    // Left accent bar
-    const accentHex = SENSOR_ACCENT[sensor.sensorType] ?? '#64748b';
-    const r = parseInt(accentHex.slice(1, 3), 16);
-    const g = parseInt(accentHex.slice(3, 5), 16);
-    const b = parseInt(accentHex.slice(5, 7), 16);
-    doc.setFillColor(r, g, b);
-    doc.roundedRect(marginL, y, 4, cardH, 1, 1, 'F');
+  // Table header
+  const c1 = mL,
+    c2 = mL + 50,
+    c3 = mL + 82,
+    c4 = mL + 106,
+    c5 = mL + 130,
+    c6 = mL + 150;
 
-    // Sensor label
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.text);
-    doc.text(sensor.sensorLabel.toUpperCase(), marginL + 10, y + 9);
+  doc.setFillColor(...C.dark);
+  doc.rect(mL, y - 3.5, cW, 6.5, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...C.white);
+  doc.text('Sensor', c1 + 2, y);
+  doc.text('Window', c2, y);
+  doc.text('Readings', c3, y);
+  doc.text('Abnormal', c4, y);
+  doc.text('Threshold', c5, y);
+  doc.text('Status', c6, y);
+  y += 6;
 
-    // Alert badge
-    if (sensor.alertTriggered) {
-      doc.setFillColor(...colors.accent);
-      doc.roundedRect(pageW - marginR - 26, y + 3, 26, 7, 1.5, 1.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(...colors.white);
-      doc.text('⚠ ALERT TRIGGERED', pageW - marginR - 13, y + 8, { align: 'center' });
-    } else {
-      doc.setFillColor(220, 252, 231);
-      doc.roundedRect(pageW - marginR - 22, y + 3, 22, 7, 1.5, 1.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(...colors.success);
-      doc.text('✓ NORMAL', pageW - marginR - 11, y + 8, { align: 'center' });
+  report.sensors.forEach((s, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(...C.bg);
+      doc.rect(mL, y - 3.5, cW, 6, 'F');
     }
-
-    // Divider
-    doc.setDrawColor(...colors.border);
-    doc.setLineWidth(0.2);
-    doc.line(marginL + 10, y + 13, pageW - marginR, y + 13);
-
-    // Stats row
-    const stats = [
-      { label: 'Window', value: `${sensor.windowMinutes} min` },
-      { label: 'Total Readings', value: String(sensor.totalReadingsInWindow) },
-      {
-        label: 'Abnormal',
-        value: String(sensor.abnormalReadingsInWindow),
-        warn: sensor.abnormalReadingsInWindow > 0,
-      },
-      { label: 'Threshold', value: String(sensor.thresholdToAlert) },
-      { label: 'Cooldown', value: `${sensor.cooldownMinutes} min` },
-    ];
-
-    const statColW = contentW / 5;
-    stats.forEach((stat, i) => {
-      const x = marginL + 10 + i * statColW;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(...(stat.warn ? colors.accent : colors.primary));
-      doc.text(stat.value, x, y + 24);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(...colors.muted);
-      doc.text(stat.label, x, y + 29);
-    });
-
-    // Last Alert row
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(...colors.muted);
+    doc.setFontSize(7.5);
+    doc.setTextColor(...C.black);
+    doc.text(s.sensorLabel, c1 + 2, y);
+    doc.text(`${s.windowMinutes} min`, c2, y);
+    doc.text(String(s.totalReadingsInWindow), c3, y);
+
+    // Abnormal col — bold if > 0
+    if (s.abnormalReadingsInWindow > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C.dark);
+    }
+    doc.text(String(s.abnormalReadingsInWindow), c4, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...C.black);
+
+    doc.text(String(s.thresholdToAlert), c5, y);
+
+    // Status
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    if (s.alertTriggered) {
+      doc.setFillColor(...C.alert);
+      doc.rect(c6 - 1, y - 3.5, 22, 5, 'F');
+      doc.setTextColor(...C.white);
+      doc.text('TRIGGERED', c6 + 10, y - 0.5, { align: 'center' });
+    } else {
+      doc.setFillColor(...C.rule);
+      doc.rect(c6 - 1, y - 3.5, 18, 5, 'F');
+      doc.setTextColor(...C.dark);
+      doc.text('NORMAL', c6 + 8, y - 0.5, { align: 'center' });
+    }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...C.black);
+    y += 6;
+  });
+
+  // Bottom border of table
+  doc.setDrawColor(...C.dark);
+  doc.setLineWidth(0.4);
+  doc.line(mL, y, pageW - mR, y);
+  y += 10;
+
+  // ══════════════════════════════════════════════════
+  // SECTION 3 — Per-sensor detail
+  // ══════════════════════════════════════════════════
+
+  needsPage(20);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...C.mid);
+  doc.text('3.  SENSOR DETAIL RECORDS', mL, y);
+  y += 4;
+  hRule();
+  y += 8;
+
+  report.sensors.forEach((sensor, sIdx) => {
+    needsPage(55);
+
+    // Sensor subsection heading
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...C.black);
+    doc.text(`3.${sIdx + 1}  ${sensor.sensorLabel}`, mL, y);
+
+    // Status tag (right-aligned, text only)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(sensor.alertTriggered ? 30 : 100, 30, 30);
     doc.text(
-      `Last Alert: ${formatPHT(sensor.lastAlertSentAt)} (PHT)`,
-      marginL + 10,
-      y + 38,
+      sensor.alertTriggered ? '[ALERT TRIGGERED]' : '[NORMAL]',
+      pageW - mR,
+      y,
+      { align: 'right' },
     );
 
-    // Readings table header
-    if (sensor.readings.length > 0) {
-      doc.setDrawColor(...colors.border);
-      doc.line(marginL + 10, y + 42, pageW - marginR, y + 42);
+    y += 3;
+    doc.setDrawColor(...C.dark);
+    doc.setLineWidth(0.3);
+    doc.line(mL, y, pageW - mR, y);
+    y += 5;
 
-      doc.setFillColor(...colors.light);
-      doc.rect(marginL + 4, y + 43, contentW - 4, 6, 'F');
+    // Parameter table for this sensor (2-col layout)
+    const paramRows: [string, string][] = [
+      ['Sensor Type', sensor.sensorType],
+      ['Monitoring Window', `${sensor.windowMinutes} minute(s)`],
+      ['Cooldown Period', `${sensor.cooldownMinutes} minute(s)`],
+      ['Alert Threshold', `${sensor.thresholdToAlert} abnormal readings`],
+      ['Total Readings (window)', String(sensor.totalReadingsInWindow)],
+      [
+        'Abnormal Readings',
+        `${sensor.abnormalReadingsInWindow} (${sensor.totalReadingsInWindow > 0 ? Math.round((sensor.abnormalReadingsInWindow / sensor.totalReadingsInWindow) * 100) : 0}%)`,
+      ],
+      ['Alert Triggered', sensor.alertTriggered ? 'Yes' : 'No'],
+      ['Last Alert Sent', formatPHT(sensor.lastAlertSentAt)],
+    ];
+
+    paramRows.forEach(([label, val], pi) => {
+      if (pi % 2 === 0) {
+        doc.setFillColor(...C.bg);
+        doc.rect(mL, y - 3.2, cW, 5.5, 'F');
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...C.mid);
+      doc.text(label, mL + 2, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...C.black);
+      // Bold the value if it's abnormal readings > 0
+      if (
+        label === 'Abnormal Readings' &&
+        sensor.abnormalReadingsInWindow > 0
+      ) {
+        doc.setFont('helvetica', 'bold');
+      }
+      doc.text(val, mL + col1W, y);
+      doc.setFont('helvetica', 'normal');
+      y += 5.5;
+    });
+
+    y += 4;
+
+    // Readings table
+    if (sensor.readings.length > 0) {
+      needsPage(20);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7);
-      doc.setTextColor(...colors.secondary);
-      doc.text('TIMESTAMP (PHT)', marginL + 10, y + 47);
-      doc.text('VALUE', marginL + 80, y + 47);
-      doc.text('STATUS', marginL + 110, y + 47);
+      doc.setTextColor(...C.mid);
+      doc.text('Observation Log (most recent readings):', mL + 2, y);
+      y += 4;
 
-      const displayReadings = sensor.readings.slice(0, 5);
-      displayReadings.forEach((reading, ri) => {
-        const ry = y + 55 + ri * 7;
+      // Table header
+      const rC1 = mL,
+        rC2 = mL + 68,
+        rC3 = mL + 130;
+
+      doc.setFillColor(...C.mid);
+      doc.rect(mL, y - 3, cW, 5.5, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...C.white);
+      doc.text('Timestamp (PHT)', rC1 + 2, y);
+      doc.text('Value', rC2, y);
+      doc.text('Classification', rC3, y);
+      y += 5;
+
+      const showReadings = sensor.readings.slice(0, 10);
+      showReadings.forEach((reading, ri) => {
+        needsPage(7);
         if (ri % 2 === 0) {
-          doc.setFillColor(252, 252, 253);
-          doc.rect(marginL + 4, ry - 4, contentW - 4, 7, 'F');
+          doc.setFillColor(...C.bg);
+          doc.rect(mL, y - 3, cW, 5.5, 'F');
         }
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
-        doc.setTextColor(...colors.text);
-        doc.text(formatShortPHT(reading.timestamp), marginL + 10, ry);
-        doc.text(String(reading.value), marginL + 80, ry);
+        doc.setTextColor(...C.black);
+        doc.text(formatShortPHT(reading.timestamp), rC1 + 2, y);
+        doc.text(String(reading.value), rC2, y);
 
-        if (reading.isAbnormal) {
-          doc.setFillColor(254, 226, 226);
-          doc.roundedRect(marginL + 107, ry - 3.5, 18, 5, 1, 1, 'F');
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(6.5);
-          doc.setTextColor(...colors.accent);
-          doc.text('ABNORMAL', marginL + 116, ry, { align: 'center' });
-        } else {
-          doc.setFillColor(220, 252, 231);
-          doc.roundedRect(marginL + 107, ry - 3.5, 14, 5, 1, 1, 'F');
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(6.5);
-          doc.setTextColor(...colors.success);
-          doc.text('NORMAL', marginL + 114, ry, { align: 'center' });
-        }
+        doc.setFont('helvetica', reading.isAbnormal ? 'bold' : 'normal');
+        doc.setTextColor(reading.isAbnormal ? 30 : 100, 30, 30);
+        doc.text(reading.isAbnormal ? 'ABNORMAL' : 'Normal', rC3, y);
+
+        doc.setTextColor(...C.black);
+        doc.setFont('helvetica', 'normal');
+        y += 5.5;
       });
 
-      if (sensor.readings.length > 5) {
+      // Bottom rule of readings table
+      doc.setDrawColor(...C.rule);
+      doc.setLineWidth(0.25);
+      doc.line(mL, y, pageW - mR, y);
+      y += 3;
+
+      if (sensor.readings.length > 10) {
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(7);
-        doc.setTextColor(...colors.muted);
+        doc.setTextColor(...C.light);
         doc.text(
-          `+${sensor.readings.length - 5} more readings not shown`,
-          marginL + 10,
-          y + cardH - 5,
+          `Note: ${sensor.readings.length - 10} additional readings omitted from this report.`,
+          mL + 2,
+          y,
         );
+        y += 5;
       }
     } else {
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
-      doc.setTextColor(...colors.muted);
-      doc.text('No readings in current window.', marginL + 10, y + 50);
+      doc.setFontSize(7.5);
+      doc.setTextColor(...C.light);
+      doc.text(
+        'No observations recorded in the current monitoring window.',
+        mL + 2,
+        y,
+      );
+      y += 6;
     }
 
-    y += cardH + 6;
-  }
+    y += 8;
+  });
 
-  // ── Footer on each page ──
+  // ══════════════════════════════════════════════════
+  // FOOTER — every page
+  // ══════════════════════════════════════════════════
+
   const totalPages = (doc as any).internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    doc.setFillColor(...colors.headerBg);
-    doc.rect(0, pageH - 12, pageW, 12, 'F');
+
+    // Bottom rule
+    doc.setDrawColor(...C.rule);
+    doc.setLineWidth(0.25);
+    doc.line(mL, pageH - 14, pageW - mR, pageH - 14);
+
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(100, 116, 139);
-    doc.text('PondWatch — Confidential Sensor Report', marginL, pageH - 5);
-    doc.text(`Page ${p} of ${totalPages}`, pageW - marginR, pageH - 5, {
+    doc.setFontSize(6.5);
+    doc.setTextColor(...C.light);
+    doc.text(
+      `PondWatch Monitoring System  |  Sensor Alert Report  |  ${formatPHT(report.generatedAt)} (PHT)`,
+      mL,
+      pageH - 9,
+    );
+    doc.text(`Page ${p} / ${totalPages}`, pageW - mR, pageH - 9, {
       align: 'right',
     });
   }
@@ -381,7 +491,8 @@ function SensorAlertCard({ sensor }: { sensor: AlertReportJson }) {
   const abnormalPct =
     sensor.totalReadingsInWindow > 0
       ? Math.round(
-          (sensor.abnormalReadingsInWindow / sensor.totalReadingsInWindow) * 100,
+          (sensor.abnormalReadingsInWindow / sensor.totalReadingsInWindow) *
+            100,
         )
       : 0;
 
@@ -557,14 +668,17 @@ export default function AlertAnalyticsPage() {
     }
   };
 
-  const triggeredCount = report?.sensors.filter((s) => s.alertTriggered).length ?? 0;
+  const triggeredCount =
+    report?.sensors.filter((s) => s.alertTriggered).length ?? 0;
 
   return (
     <div className="min-h-screen p-6">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Alert Analytics</h2>
+          <h2 className="text-2xl font-bold text-foreground">
+            Alert Analytics
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Real-time sensor alert window status and abnormal reading breakdown
           </p>
