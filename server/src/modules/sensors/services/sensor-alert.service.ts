@@ -297,7 +297,7 @@ export class SensorAlertService {
     ];
 
     return {
-      reportTitle: 'Aquaculture Sensor Alert Report',
+      reportTitle: 'PondWatch Sensor Alert Report',
       generatedAt: new Date().toISOString(),
       sensors: sensors.map((s) => this.generateAlertReport(s)),
     };
