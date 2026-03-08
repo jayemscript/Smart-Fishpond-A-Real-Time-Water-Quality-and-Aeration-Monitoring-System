@@ -1,20 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  PrimaryColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  VersionColumn,
-  BeforeInsert,
-  DeleteDateColumn,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { v7 as uuidv7 } from 'uuid';
-import { User } from 'src/modules/users/entities/user.entity';
-import { DateTimeTransformer } from 'src/shared/dates/date-time.transformer';
+import { Entity, Column } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base-entity';
 
 @Entity('emails')
