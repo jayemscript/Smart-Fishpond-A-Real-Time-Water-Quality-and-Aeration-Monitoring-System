@@ -54,7 +54,7 @@ const AuthForm = () => {
           username: response.user.username,
         }),
       );
-      router.replace('/passkey');
+      router.replace('/dashboard');
       showToastSuccess('Success Login', response.message, 'top-right');
       window.location.reload();
     } catch (error: unknown) {

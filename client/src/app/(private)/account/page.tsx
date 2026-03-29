@@ -3,7 +3,7 @@ import AccountPageContent from '@/components/pages/account-page.content';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Account | RVTM AMS',
+  title: 'Account | ',
   description: 'Account Informations',
 };
 
