@@ -6,6 +6,11 @@ export function CSRFMiddleware(
   res: Response,
   next: NextFunction,
 ) {
+  // Skip CSRF for sensor endpoints (ESP32 / IoT devices can't send CSRF tokens)
+  const sensorRoutes = ['/api/sensors'];
+  if (sensorRoutes.some((path) => req.path.startsWith(path))) {
+    return next();
+  }
   if (process.env.NODE_ENV === 'development') {
     return next();
   }
