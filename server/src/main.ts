@@ -77,6 +77,12 @@ async function bootstrap() {
       '/api/auth/verify-passkey',
       '/api/auth/refresh',
       '/api/auth/logout',
+      '/api/sensors/data',
+      '/api/sensors/temperature',
+      '/api/sensors/water-level',
+      '/api/sensors/turbidity',
+      '/api/sensors/ph-water',
+      '/api/sensors/do',
     ];
 
     if (excludedRoutes.some((path) => req.path.startsWith(path))) {
